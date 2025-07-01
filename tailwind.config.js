@@ -9,8 +9,10 @@ export default {
     extend: {
       colors: {
         // 재정의된 다크 테마 색상 팔레트 (더욱 깊이감 있는 톤)
-        'dark-bg': '#080808', // 가장 깊은 배경색
+        // 'dark-bg': '#080808', // 가장 깊은 배경색
         'dark-surface': '#181818', // 카드, 패널 등 표면 색상
+        'dark-bg': '#121212',   // 배경색
+        'accent': '#03DAC6',    // 폰트 및 포인트 색
         'primary-text': '#E0E0E0',
         'secondary-text': '#A0A0A0',
         'accent': '#00C896', // 생동감 있는 에메랄드 그린

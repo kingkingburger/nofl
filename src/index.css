@@ -2,6 +2,8 @@
 
 /* 전역 스타일 및 폰트 렌더링 최적화 */
 html, body, #root {
+  background-color: #181818;
+  color: #03DAC6;
   height: 100%;
   margin: 0;
   padding: 0;

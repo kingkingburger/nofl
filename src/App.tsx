@@ -22,7 +22,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 animate-fade-in relative z-0 bg-[#121212] text-[#03DAC6]">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 relative z-0 animate-fade-in">
       {/* 창을 드래그할 수 있는 영역 */}
       <div className="fixed top-0 left-0 w-full h-8 -webkit-app-region-drag z-50"></div>
 
