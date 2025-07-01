@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 

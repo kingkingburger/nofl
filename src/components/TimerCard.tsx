@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { TimerState } from '../types/types';
 
@@ -8,31 +7,48 @@ interface TimerCardProps {
 }
 
 /**
- * 개별 라인의 타이머 정보를 시각적으로 표시하는 카드 컴포넌트입니다.
- * @param laneName - 표시할 라인의 이름 (예: "탑")
- * @param timerState - 해당 라인의 현재 타이머 상태 객체
+ * 다크 배경(#121212)과 포인트 텍스트(#03DAC6)를 적용한 모던 카드입니다.
  */
 const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
   const { remainingTime, isActive, isFlashing } = timerState;
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const cardClasses = `
-    relative bg-dark-surface rounded-xl p-6 border border-gray-800 shadow-lg
-    transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-2xl
-    ${isActive ? 'border-accent shadow-accent-glow' : ''}
-    ${isFlashing ? 'animate-flash' : ''}
-  `;
+  const containerClasses = `
+    relative p-6 rounded-xl overflow-hidden
+    bg-[#121212] text-[#03DAC6]
+    border border-[#03DAC6]
+    shadow-lg
+    transition-transform duration-300 ease-in-out
+    hover:scale-105
+    ${isActive ? 'ring-2 ring-[#03DAC6] animate-pulse' : ''}
+    ${isFlashing ? 'animate-ping' : ''}
+  `.trim();
 
   return (
-    <div className={cardClasses}>
-      <h2 className="text-2xl font-semibold mb-4 text-primary-text">{laneName}</h2>
-      <div className="text-5xl font-bold text-accent mb-2 drop-shadow-md">{formatTime(remainingTime)}</div>
-      <div className="text-lg text-secondary-text">{isActive ? '활성' : '대기중'}</div>
+    <div className={containerClasses}>
+      {/* 글래스모피즘 블러 레이어 */}
+      <div className="absolute inset-0 bg-opacity-5 backdrop-blur-sm" />
+      <div className="relative flex flex-col items-center space-y-2">
+        <h2 className="text-xl font-semibold">{laneName}</h2>
+        <div className="text-5xl font-bold tracking-wide drop-shadow-md">
+          {formatTime(remainingTime)}
+        </div>
+        <span
+          className={`
+            px-3 py-1 rounded-full text-sm font-medium
+            ${isActive 
+              ? ' bg-opacity-20' 
+              : ' bg-opacity-10'}
+          `}
+        >
+          {isActive ? '활성' : '대기중'}
+        </span>
+      </div>
     </div>
   );
 };
