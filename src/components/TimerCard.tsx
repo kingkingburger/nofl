@@ -1,5 +1,5 @@
 import React from 'react';
-import { TimerState } from '../types/types';
+import type { TimerState } from '../types/types';
 
 interface TimerCardProps {
   laneName: string;

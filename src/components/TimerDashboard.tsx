@@ -1,6 +1,6 @@
 import React from 'react';
 import TimerCard from './TimerCard';
-import { Timers } from '../types/types';
+import type { Timers } from '../types/types';
 import { LANES } from '../constants/lanes';
 
 interface TimerDashboardProps {
