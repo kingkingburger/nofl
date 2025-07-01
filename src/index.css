@@ -1,41 +1,151 @@
+@import "tailwindcss";  /* v4 이상에서 base/components/utilities 모두 로드 */
 
-@import "tailwindcss";
+/* 1) base 레이어에 전역 스타일과 theme() 호출을 넣어야 합니다 */
+@layer base {
+  :root {
+    --background-color: #121212;
+    --surface-color: #1E1E1E;
+    --primary-text-color: #E0E0E0;
+    --secondary-text-color: #A0A0A0;
+    --accent-color: #03DAC6;
+    --accent-glow: rgba(3, 218, 198, 0.3);
+    --warning-color: #FFD700;
+    --warning-glow: rgba(255, 215, 0, 0.3);
+    --font-family: 'Poppins', sans-serif;
+  }
 
-/* 전역 스타일 및 폰트 렌더링 최적화 */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* 스크롤바 제거 */
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Global styles */
+  body {
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
+    font-family: var(--font-family);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+
+  @keyframes flash-animation {
+    0%, 100% { box-shadow: 0 0 20px var(--warning-glow); }
+    50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+  }
 }
 
-body {
-  /* background-color: theme('colors.dark-bg');
-  color: theme('colors.primary-text');
-  font-family: theme('fontFamily.sans'); */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+/* 2) components 레이어에 @apply 유틸리티를 넣습니다 */
+@layer components {
+  .App {
+    @apply text-center;
+  }
 
-/* Electron 드래그 영역 스타일 */
-.-webkit-app-region-drag {
-  -webkit-app-region: drag;
-}
+  .App-header {
+    @apply mb-16;
+  }
 
-/* 투명도 슬라이더 트랙 및 썸 스타일 */
-input[type="range"]::-webkit-slider-runnable-track {
-  @apply bg-gray-700 rounded-lg h-2;
-}
+  .App-header h1 {
+    @apply text-[3rem] font-bold m-0 tracking-[2px];
+    color: var(--accent-color);
+  }
 
-input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4  rounded-full -mt-1 border-none shadow-md;
-}
+  .App-header p {
+    @apply text-[1.1rem];
+    color: var(--secondary-text-color);
+  }
 
-input[type="range"]::-moz-range-track {
-  @apply bg-gray-700 rounded-lg h-2;
-}
+  .timer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
 
-input[type="range"]::-moz-range-thumb {
-  @apply appearance-none w-4 h-4  rounded-full -mt-1 border-none shadow-md;
+  .lane {
+    background-color: var(--surface-color);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    border: 1px solid #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .lane.active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .lane.flashing {
+    animation: flash-animation 1.5s infinite ease-in-out;
+    border-color: var(--warning-color);
+  }
+
+  .lane-name {
+    @apply text-xl font-semibold mb-4;
+  }
+
+  .timer-display {
+    @apply text-[3rem] font-bold mb-2;
+    color: var(--accent-color);
+  }
+
+  .status-text {
+    @apply text-base;
+    color: var(--secondary-text-color);
+  }
+
+  .control-panel {
+    @apply flex justify-center;
+  }
+
+  .control-button {
+    @apply bg-[var(--accent-color)] text-[var(--background-color)] rounded-full py-4 px-10 text-[1.2rem] font-semibold cursor-pointer flex items-center gap-[0.8rem] transition-transform duration-200 ease-in-out;
+  }
+
+  .control-button:hover {
+    @apply -translate-y-1;
+  }
+
+  .control-button.active {
+    background-color: var(--warning-color);
+  }
+
+  .control-button .button-text {
+    line-height: 1;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #root { padding: 1rem; }
+    .App-header h1 { font-size: 2.5rem; }
+    .timer-container {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .lane { padding: 1.5rem 1rem; }
+    .timer-display { font-size: 2.5rem; }
+  }
+
+  @media (max-width: 480px) {
+    .timer-container {
+      grid-template-columns: 1fr 1fr;
+    }
+    .lane { padding: 1rem 0.5rem; }
+    .lane-name { font-size: 1.2rem; }
+    .timer-display { font-size: 2rem; }
+    .control-button { padding: 0.8rem 1.5rem; font-size: 1rem; }
+  }
 }
