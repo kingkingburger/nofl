@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { type TimerState } from '../types/types';
+import { TimerState } from '../types/types';
 
 interface TimerCardProps {
   laneName: string;
@@ -22,16 +21,16 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
   };
 
   const cardClasses = `
-    lane
-    ${isActive ? 'active' : ''}
-    ${isFlashing ? 'flashing' : ''}
+    bg-dark-surface rounded-xl p-6 border border-gray-800 transition-all duration-300 ease-in-out
+    ${isActive ? 'border-accent shadow-accent-glow' : ''}
+    ${isFlashing ? 'animate-flash' : ''}
   `;
 
   return (
     <div className={cardClasses}>
-      <h2 className="lane-name">{laneName}</h2>
-      <div className="timer-display">{formatTime(remainingTime)}</div>
-      <div className="status-text">{isActive ? '활성' : '대기중'}</div>
+      <h2 className="text-2xl font-semibold mb-4 text-primary-text">{laneName}</h2>
+      <div className="text-5xl font-bold text-accent mb-2">{formatTime(remainingTime)}</div>
+      <div className="text-lg text-secondary-text">{isActive ? '활성' : '대기중'}</div>
     </div>
   );
 };

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import TimerCard from './TimerCard';
-import { type Timers } from '../types/types';
+import { Timers } from '../types/types';
 import { LANES } from '../constants/lanes';
 
 interface TimerDashboardProps {
@@ -14,7 +13,7 @@ interface TimerDashboardProps {
  */
 const TimerDashboard: React.FC<TimerDashboardProps> = ({ timers }) => {
   return (
-    <div className="timer-container">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
       {LANES.map(lane => (
         <TimerCard key={lane.name} laneName={lane.name} timerState={timers[lane.name]} />
       ))}
