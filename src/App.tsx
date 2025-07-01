@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import TimerDashboard from './components/TimerDashboard';
 import ControlPanel from './components/ControlPanel';
@@ -22,12 +23,12 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-dark-bg text-primary-text font-sans p-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-dark-bg text-primary-text font-sans p-8 animate-fade-in">
       {/* 창을 드래그할 수 있는 영역 */}
-      <div className="fixed top-0 left-0 w-full h-8 -webkit-app-region-drag"></div>
+      <div className="fixed top-0 left-0 w-full h-8 -webkit-app-region-drag z-50"></div>
 
       <header className="mb-16 text-center">
-        <h1 className="text-5xl font-bold text-accent tracking-wider mb-2">NO FLASH</h1>
+        <h1 className="text-5xl font-bold text-accent tracking-wider mb-2 drop-shadow-lg">NO FLASH</h1>
         <p className="text-lg text-secondary-text">"라인명 노플" 또는 "Lane name no flash"</p>
       </header>
       <main className="w-full max-w-5xl">
@@ -36,8 +37,8 @@ function App() {
       </main>
 
       {/* 투명도 조절 슬라이더 */}
-      <footer className="fixed bottom-5 left-1/2 -translate-x-1/2 w-72">
-        <div className="flex items-center gap-4 bg-dark-surface bg-opacity-50 p-2 rounded-full backdrop-blur-sm">
+      <footer className="fixed bottom-5 left-1/2 -translate-x-1/2 w-72 z-40">
+        <div className="flex items-center gap-4 bg-dark-surface bg-opacity-70 p-3 rounded-full shadow-lg backdrop-blur-md border border-gray-700">
           <FaSun className="text-xl text-secondary-text" />
           <input
             type="range"

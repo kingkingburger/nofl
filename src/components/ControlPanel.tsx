@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 
@@ -18,7 +19,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isRecognizing, onToggle }) 
         onClick={onToggle}
         className={`
           flex items-center gap-3 px-8 py-4 rounded-full text-lg font-semibold cursor-pointer
-          transition-all duration-300 ease-in-out transform hover:-translate-y-1
+          transition-all duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg
           ${isRecognizing ? 'bg-warning text-dark-bg' : 'bg-accent text-dark-bg'}
         `}
       >

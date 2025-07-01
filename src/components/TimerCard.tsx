@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { TimerState } from '../types/types';
 
@@ -21,7 +22,8 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
   };
 
   const cardClasses = `
-    bg-dark-surface rounded-xl p-6 border border-gray-800 transition-all duration-300 ease-in-out
+    relative bg-dark-surface rounded-xl p-6 border border-gray-800 shadow-lg
+    transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-2xl
     ${isActive ? 'border-accent shadow-accent-glow' : ''}
     ${isFlashing ? 'animate-flash' : ''}
   `;
@@ -29,7 +31,7 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
   return (
     <div className={cardClasses}>
       <h2 className="text-2xl font-semibold mb-4 text-primary-text">{laneName}</h2>
-      <div className="text-5xl font-bold text-accent mb-2">{formatTime(remainingTime)}</div>
+      <div className="text-5xl font-bold text-accent mb-2 drop-shadow-md">{formatTime(remainingTime)}</div>
       <div className="text-lg text-secondary-text">{isActive ? '활성' : '대기중'}</div>
     </div>
   );
