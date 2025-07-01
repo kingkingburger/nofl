@@ -1,0 +1,70 @@
+body {
+  background-color: #282c34;
+  color: white;
+  font-family: sans-serif;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+  margin-bottom: 2rem;
+}
+
+.timer-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.lane {
+  background-color: #444;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 150px;
+}
+
+.timer {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.status {
+  font-size: 1.2rem;
+}
+
+.control-button {
+  background-color: #61dafb;
+  border: none;
+  color: #282c34;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.control-button:hover {
+  background-color: #4fa8c4;
+}
+
+.lane.active .timer {
+  color: #61dafb;
+}
+
+.lane.active .status {
+  color: #ffc107;
+}
+
+.lane.flashing {
+  animation: flash 1s infinite;
+}
+
+@keyframes flash {
+  0% { background-color: #444; }
+  50% { background-color: #ffc107; }
+  100% { background-color: #444; }
+}
