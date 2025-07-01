@@ -1,14 +1,17 @@
-
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // 애플리케이션 창을 생성하는 함수
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      // __dirname 대신 app.getAppPath()를 사용하여 빌드된 앱에서도 올바른 경로를 찾도록 합니다.
+      preload: path.join(__dirname, 'dist-electron', 'preload.js'),
       contextIsolation: true, // 보안을 위해 컨텍스트 격리 활성화
       nodeIntegration: false, // Node.js 통합 비활성화
     },
@@ -22,7 +25,8 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5175');
     mainWindow.webContents.openDevTools(); // 개발자 도구 열기
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    // __dirname 대신 app.getAppPath()를 사용하여 빌드된 앱에서도 올바른 경로를 찾도록 합니다.
+    mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
   }
 
   // 렌더러 프로세스로부터 투명도 값을 받기 위한 IPC 핸들러

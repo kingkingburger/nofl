@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ESNext",
     "outDir": "../dist-electron",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "Node",
   },
   "include": ["./**/*.ts"],
   "exclude": ["../node_modules"]
