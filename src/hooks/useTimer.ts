@@ -1,4 +1,3 @@
-
 import { useReducer, useEffect, useRef } from 'react';
 import type { Timers, TimerState } from '../types/types';
 import { LANES, FLASH_DURATION, NOTIFICATION_TIME } from '../constants/lanes';
