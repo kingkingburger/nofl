@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface ControlPanelProps {
   isRecognizing: boolean;
@@ -12,6 +13,8 @@ interface ControlPanelProps {
  * @param onToggle - 버튼 클릭 시 호출될 함수
  */
 const ControlPanel: React.FC<ControlPanelProps> = ({ isRecognizing, onToggle }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex justify-center">
       <button
@@ -24,7 +27,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isRecognizing, onToggle }) 
       >
         {isRecognizing ? <FaMicrophoneSlash className="text-xl" /> : <FaMicrophone className="text-xl" />}
         <span className="leading-none">
-          {isRecognizing ? '음성 인식 중지' : '음성 인식 시작'}
+          {isRecognizing ? t('recognizing_stop') : t('recognizing_start')}
         </span>
       </button>
     </div>

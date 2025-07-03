@@ -1,6 +1,6 @@
-import { useReducer, useEffect, useRef } from 'react';
-import type { Timers, TimerState } from '../types/types';
-import { LANES, FLASH_DURATION, NOTIFICATION_TIME } from '../constants/lanes';
+import {useEffect, useReducer, useRef} from 'react';
+import type {Timers} from '../types/types';
+import {FLASH_DURATION, LANES, NOTIFICATION_TIME} from '../constants/lanes';
 
 // 상태 변경 로직을 정의하는 Reducer 함수입니다.
 const timerReducer = (state: Timers, action: { type: string; payload?: any }): Timers => {
@@ -34,6 +34,20 @@ const timerReducer = (state: Timers, action: { type: string; payload?: any }): T
   }
 };
 
+const recognitionReducer = (state: boolean, action: { type: string }) => {
+  switch (action.type) {
+    case 'START':
+      return true;
+    case 'STOP':
+      return false;
+    case 'TOGGLE':
+      return !state;
+    default:
+      return state;
+  }
+};
+
+
 // 음성 합성을 위한 유틸리티 함수
 const speak = (text: string) => {
   const utterance = new SpeechSynthesisUtterance(text);
@@ -52,8 +66,9 @@ export const useTimer = () => {
   }, {} as Timers);
 
   const [timers, dispatch] = useReducer(timerReducer, initialState);
-  const [isRecognizing, setIsRecognizing] = useReducer((state) => !state, false);
+  const [isRecognizing, dispatchRecognition] = useReducer(recognitionReducer, false);
   const recognitionRef = useRef<any>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const annyang = (window as any).annyang;
@@ -71,10 +86,25 @@ export const useTimer = () => {
     annyang.addCommands(commands);
     recognitionRef.current = annyang;
 
-    annyang.addCallback('start', () => setIsRecognizing());
-    annyang.addCallback('end', () => isRecognizing && setIsRecognizing());
+    annyang.addCallback('start', () => dispatchRecognition({ type: 'START' }));
+    annyang.addCallback('end', () => dispatchRecognition({ type: 'STOP' }));
 
     return () => annyang.abort();
+  }, []);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (recognitionRef.current) {
+      if (isRecognizing) {
+        recognitionRef.current.start({ autoRestart: true, continuous: false });
+      } else {
+        recognitionRef.current.abort();
+      }
+    }
   }, [isRecognizing]);
 
   useEffect(() => {
@@ -83,9 +113,7 @@ export const useTimer = () => {
   }, []);
 
   const toggleRecognition = () => {
-    if (recognitionRef.current) {
-      isRecognizing ? recognitionRef.current.abort() : recognitionRef.current.start({ autoRestart: true, continuous: false });
-    }
+    dispatchRecognition({ type: 'TOGGLE' });
   };
 
   return { timers, toggleRecognition, isRecognizing };
