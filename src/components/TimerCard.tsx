@@ -19,12 +19,14 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
   };
 
   const containerClasses = `
-    relative p-6 rounded-xl overflow-hidden
+    relative p-2 rounded-lg overflow-hidden
     bg-[#121212] text-[#03DAC6]
     border border-[#03DAC6]
-    shadow-lg
+    shadow-md
     transition-transform duration-300 ease-in-out
     hover:scale-105
+    w-[88px] h-[88px]
+    flex flex-col items-center justify-center
     ${isActive ? 'ring-2 ring-[#03DAC6] animate-pulse' : ''}
     ${isFlashing ? 'animate-ping' : ''}
   `.trim();
@@ -33,14 +35,14 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
     <div className={containerClasses}>
       {/* 글래스모피즘 블러 레이어 */}
       <div className="absolute inset-0 bg-opacity-5 backdrop-blur-sm" />
-      <div className="relative flex flex-col items-center space-y-2">
-        <h2 className="text-xl font-semibold">{laneName}</h2>
-        <div className="text-5xl font-bold tracking-wide drop-shadow-md">
+      <div className="relative flex flex-col items-center space-y-1">
+        <h2 className="text-sm font-semibold">{laneName}</h2>
+        <div className="text-2xl font-bold tracking-wide drop-shadow-md">
           {formatTime(remainingTime)}
         </div>
         <span
           className={`
-            px-3 py-1 rounded-full text-sm font-medium
+            px-2 py-0.5 rounded-full text-xs font-medium
             ${isActive 
               ? ' bg-opacity-20' 
               : ' bg-opacity-10'}
