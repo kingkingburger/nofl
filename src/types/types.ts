@@ -24,6 +24,16 @@ export interface TimerState {
 export type Timers = Record<string, TimerState>;
 
 /**
+ * 음성 명령어를 나타내는 타입입니다.
+ */
+export interface Command {
+  id: string;
+  phrase: string;
+  lane: string;
+}
+
+
+/**
  * Electron의 preload 스크립트를 통해 노출되는 API의 타입입니다.
  */
 export interface IElectronAPI {

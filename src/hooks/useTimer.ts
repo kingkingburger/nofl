@@ -1,5 +1,6 @@
 import { useReducer, useEffect, useRef } from "react";
-import type { Timers, TimerState } from "../types/types";
+import * as annyang from "annyang";
+import type { Timers, Command } from "../types/types";
 import { LANES, FLASH_DURATION, NOTIFICATION_TIME } from "../constants/lanes";
 
 // 상태 변경 로직을 정의하는 Reducer 함수입니다.
@@ -51,7 +52,7 @@ const speak = (text: string) => {
  * 노플 타이머의 모든 로직(상태 관리, 음성 인식, 타이머 생명주기)을 관리하는 커스텀 훅입니다.
  * @returns 타이머 상태, 음성 인식 제어 함수, 현재 인식 상태
  */
-export const useTimer = () => {
+export const useTimer = (commands: Command[]) => {
   const initialState: Timers = LANES.reduce((acc, lane) => {
     acc[lane.name] = {
       remainingTime: FLASH_DURATION,
@@ -66,11 +67,10 @@ export const useTimer = () => {
     (state) => !state,
     false
   );
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<typeof annyang | null>(null);
 
   useEffect(() => {
-    const annyang = (window as any).annyang;
-    annyang.debug(true); // 모든 내부 로그를 콘솔로 확인
+    // annyang.debug(true); // 모든 내부 로그를 콘솔로 확인
     if (!annyang) {
       console.error("Annyang 라이브러리를 찾을 수 없습니다.");
       return;
@@ -91,24 +91,18 @@ export const useTimer = () => {
       }
     );
 
-    // 기존 로직…
-    const commands = LANES.reduce((acc, lane) => {
-      acc[`*term ${lane.kor} 노플`] = () =>
-        dispatch({ type: "START_TIMER", payload: { lane: lane.name } });
-      acc[`*term ${lane.eng} no flash`] = () =>
-        dispatch({ type: "START_TIMER", payload: { lane: lane.name } });
+    const annyangCommands = commands.reduce((acc, command) => {
+      acc[command.phrase] = () => {
+        dispatch({ type: "START_TIMER", payload: { lane: command.lane } });
+      };
       return acc;
     }, {} as Record<string, () => void>);
 
-    annyang.addCommands(commands);
+    annyang.addCommands(annyangCommands);
     recognitionRef.current = annyang;
 
-    // 음성 인식 상태 토글
-    annyang.addCallback("start", () => setIsRecognizing());
-    annyang.addCallback("end", () => isRecognizing && setIsRecognizing());
-
     return () => annyang.abort();
-  }, [isRecognizing]);
+  }, []);
 
   useEffect(() => {
     const timerId = setInterval(() => dispatch({ type: "TICK" }), 1000);
@@ -117,12 +111,15 @@ export const useTimer = () => {
 
   const toggleRecognition = () => {
     if (recognitionRef.current) {
-      isRecognizing
-        ? recognitionRef.current.abort()
-        : recognitionRef.current.start({
-            autoRestart: true,
-            continuous: false,
-          });
+      if (isRecognizing) {
+        recognitionRef.current.abort();
+      } else {
+        recognitionRef.current.start({
+          autoRestart: true,
+          continuous: false,
+        });
+      }
+      setIsRecognizing();
     }
   };
 

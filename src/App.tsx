@@ -1,17 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import TimerDashboard from './components/TimerDashboard';
 import ControlPanel from './components/ControlPanel';
+import CommandEditor from './components/CommandEditor';
 import { useTimer } from './hooks/useTimer';
 import { FaSun, FaWindowMinimize, FaWindowMaximize } from 'react-icons/fa';
+import type { Command } from './types/types';
 
 /**
  * 노플 애플리케이션의 메인 컴포넌트입니다.
  * 전체 레이아웃을 구성하고, useTimer 훅을 통해 모든 상태와 로직을 관리합니다.
  */
 function App() {
-  const { timers, toggleRecognition, isRecognizing } = useTimer();
+  const [commands, setCommands] = useState<Command[]>([
+    { id: '1', phrase: '탑 노플', lane: 'Top' },
+    { id: '2', phrase: '정글 노플', lane: 'Jungle' },
+    { id: '3', phrase: '미드 노플', lane: 'Mid' },
+    { id: '4', phrase: '바텀 노플', lane: 'Bot' },
+    { id: '5', phrase: '서폿 노플', lane: 'Support' },
+    { id: '6', phrase: 'top no flash', lane: 'Top' },
+    { id: '7', phrase: 'jungle no flash', lane: 'Jungle' },
+    { id: '8', phrase: 'mid no flash', lane: 'Mid' },
+    { id: '9', phrase: 'bot no flash', lane: 'Bot' },
+    { id: '10', phrase: 'support no flash', lane: 'Support' },
+  ]);
+  const { timers, toggleRecognition, isRecognizing } = useTimer(commands);
   const [opacity, setOpacity] = useState(1);
   const [isMiniMode, setIsMiniMode] = useState(true);
+
+  const handleAddCommand = (command: Command) => {
+    setCommands((prevCommands) => [...prevCommands, command]);
+  };
+
+  const handleRemoveCommand = (commandId: string) => {
+    setCommands((prevCommands) => prevCommands.filter((cmd) => cmd.id !== commandId));
+  };
 
   useEffect(() => {
     if (isMiniMode) {
@@ -59,6 +81,13 @@ function App() {
       <main className="w-full max-w-6xl relative z-10">
         <TimerDashboard timers={timers} />
         <ControlPanel isRecognizing={isRecognizing} onToggle={toggleRecognition} />
+        {!isMiniMode && (
+          <CommandEditor
+            commands={commands}
+            onAddCommand={handleAddCommand}
+            onRemoveCommand={handleRemoveCommand}
+          />
+        )}
       </main>
 
       {!isMiniMode && (
