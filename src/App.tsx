@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import TimerDashboard from './components/TimerDashboard';
 import ControlPanel from './components/ControlPanel';
 import Header from './components/Header';

@@ -1,4 +1,3 @@
-
 import { renderHook, act } from '@testing-library/react';
 import { useTimer } from './useTimer';
 import { FLASH_DURATION } from '../constants/lanes';
