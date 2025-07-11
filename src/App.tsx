@@ -29,6 +29,13 @@ function App() {
       <main className="w-full max-w-6xl relative z-10">
         <TimerDashboard timers={timers} />
         <ControlPanel isRecognizing={isRecognizing} onToggle={toggleRecognition} />
+        {!isMiniMode && (
+          <CommandEditor
+            commands={commands}
+            onAddCommand={handleAddCommand}
+            onRemoveCommand={handleRemoveCommand}
+          />
+        )}
       </main>
 
       {!isMiniMode && <Footer opacity={opacity} onOpacityChange={handleOpacityChange} />}

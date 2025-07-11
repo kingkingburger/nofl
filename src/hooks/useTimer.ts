@@ -3,9 +3,12 @@ import type {Timers} from '../types/types';
 import {FLASH_DURATION, LANES, NOTIFICATION_TIME} from '../constants/lanes';
 
 // 상태 변경 로직을 정의하는 Reducer 함수입니다.
-const timerReducer = (state: Timers, action: { type: string; payload?: any }): Timers => {
+const timerReducer = (
+  state: Timers,
+  action: { type: string; payload?: any }
+): Timers => {
   switch (action.type) {
-    case 'START_TIMER':
+    case "START_TIMER":
       return {
         ...state,
         [action.payload.lane]: {
@@ -14,7 +17,7 @@ const timerReducer = (state: Timers, action: { type: string; payload?: any }): T
           isFlashing: false,
         },
       };
-    case 'TICK':
+    case "TICK":
       const newState = { ...state };
       for (const lane in newState) {
         if (newState[lane].isActive && newState[lane].remainingTime > 0) {
@@ -23,7 +26,10 @@ const timerReducer = (state: Timers, action: { type: string; payload?: any }): T
             newState[lane].isFlashing = true;
             speak(`${lane} 1분 남았습니다.`);
           }
-        } else if (newState[lane].isActive && newState[lane].remainingTime === 0) {
+        } else if (
+          newState[lane].isActive &&
+          newState[lane].remainingTime === 0
+        ) {
           newState[lane].isActive = false;
           newState[lane].isFlashing = false;
         }
@@ -51,7 +57,7 @@ const recognitionReducer = (state: boolean, action: { type: string }) => {
 // 음성 합성을 위한 유틸리티 함수
 const speak = (text: string) => {
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ko-KR';
+  utterance.lang = "ko-KR";
   speechSynthesis.speak(utterance);
 };
 
@@ -59,9 +65,13 @@ const speak = (text: string) => {
  * 노플 타이머의 모든 로직(상태 관리, 음성 인식, 타이머 생명주기)을 관리하는 커스텀 훅입니다.
  * @returns 타이머 상태, 음성 인식 제어 함수, 현재 인식 상태
  */
-export const useTimer = () => {
+export const useTimer = (commands: Command[]) => {
   const initialState: Timers = LANES.reduce((acc, lane) => {
-    acc[lane.name] = { remainingTime: FLASH_DURATION, isActive: false, isFlashing: false };
+    acc[lane.name] = {
+      remainingTime: FLASH_DURATION,
+      isActive: false,
+      isFlashing: false,
+    };
     return acc;
   }, {} as Timers);
 
@@ -71,19 +81,35 @@ export const useTimer = () => {
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    const annyang = (window as any).annyang;
+    // annyang.debug(true); // 모든 내부 로그를 콘솔로 확인
     if (!annyang) {
       console.error("Annyang 라이브러리를 찾을 수 없습니다.");
       return;
     }
 
-    const commands = LANES.reduce((acc, lane) => {
-      acc[`*term ${lane.kor} 노플`] = () => dispatch({ type: 'START_TIMER', payload: { lane: lane.name } });
-      acc[`*term ${lane.eng} no flash`] = () => dispatch({ type: 'START_TIMER', payload: { lane: lane.name } });
+    // ‼️ 음성 인식 결과를 콘솔에 출력
+    annyang.addCallback("result", (phrases: string[]) => {
+      /* 예: ["top no flash", "잡 노플래시"] */
+      console.log("[음성 인식 결과]", phrases);
+    });
+
+    // 필요하면 최종 매칭 결과만 보고 싶을 때
+    annyang.addCallback(
+      "resultMatch",
+      (userSaid: string, commandText: string) => {
+        console.log(`[매칭 성공] 사용자가 말한 문장: ${userSaid}`);
+        console.log(`[매칭된 명령] ${commandText}`);
+      }
+    );
+
+    const annyangCommands = commands.reduce((acc, command) => {
+      acc[command.phrase] = () => {
+        dispatch({ type: "START_TIMER", payload: { lane: command.lane } });
+      };
       return acc;
     }, {} as Record<string, () => void>);
 
-    annyang.addCommands(commands);
+    annyang.addCommands(annyangCommands);
     recognitionRef.current = annyang;
 
     annyang.addCallback('start', () => dispatchRecognition({ type: 'START' }));
@@ -108,7 +134,7 @@ export const useTimer = () => {
   }, [isRecognizing]);
 
   useEffect(() => {
-    const timerId = setInterval(() => dispatch({ type: 'TICK' }), 1000);
+    const timerId = setInterval(() => dispatch({ type: "TICK" }), 1000);
     return () => clearInterval(timerId);
   }, []);
 
