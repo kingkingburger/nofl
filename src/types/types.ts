@@ -1,4 +1,3 @@
-
 /**
  * 개별 라인의 정보를 나타내는 타입입니다.
  */
@@ -6,6 +5,7 @@ export interface Lane {
   name: string;
   kor: string;
   eng: string;
+  aliases: string[];
 }
 
 /**
@@ -32,17 +32,20 @@ export interface Command {
   lane: string;
 }
 
-
 /**
  * Electron의 preload 스크립트를 통해 노출되는 API의 타입입니다.
  */
 export interface IElectronAPI {
   setOpacity: (opacity: number) => void;
+  enterNormalMode: () => void;
+  enterMiniMode: () => void;
+  sendAudioData: (data: Blob) => void;
+  onSpeechToTextResult: (callback: (text: string) => void) => (() => void) | undefined;
 }
 
 // window 객체에 electronAPI를 추가하기 위한 글로벌 타입 확장
 declare global {
   interface Window {
-    electronAPI: IElectronAPI;
+    electronAPI?: IElectronAPI;
   }
 }

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 let mainWindow = null;
-let currentMode = 'mini'; // 'mini' 또는 'normal'
+const currentMode = 'mini'; // 'mini' 또는 'normal'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 function createWindow() {

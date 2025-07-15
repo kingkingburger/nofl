@@ -1,0 +1,10 @@
+{
+  "title": "NO FLASH",
+  "subtitle": "\"Lane name no flash\" or \"라인명 노플\"",
+  "recognizing_start": "Start Voice Recognition",
+  "recognizing_stop": "Stop Voice Recognition",
+  "active": "Active",
+  "inactive": "Inactive",
+  "normal_mode": "Switch to Normal Mode",
+  "mini_mode": "Switch to Mini Mode"
+}

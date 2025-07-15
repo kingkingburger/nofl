@@ -1,5 +1,6 @@
 import React from 'react';
 import type { TimerState } from '../types/types';
+import { useTranslation } from 'react-i18next';
 
 interface TimerCardProps {
   laneName: string;
@@ -10,6 +11,7 @@ interface TimerCardProps {
  * 다크 배경(#121212)과 포인트 텍스트(#03DAC6)를 적용한 모던 카드입니다.
  */
 const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
+  const { t } = useTranslation();
   const { remainingTime, isActive, isFlashing } = timerState;
 
   const formatTime = (seconds: number): string => {
@@ -20,7 +22,6 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
 
   const containerClasses = `
     relative p-2 rounded-lg overflow-hidden
-    bg-[#121212] text-[#03DAC6]
     border border-[#03DAC6]
     shadow-md
     transition-transform duration-300 ease-in-out
@@ -48,7 +49,7 @@ const TimerCard: React.FC<TimerCardProps> = ({ laneName, timerState }) => {
               : ' bg-opacity-10'}
           `}
         >
-          {isActive ? '활성' : '대기중'}
+          {isActive ? t('active') : t('inactive')}
         </span>
       </div>
     </div>

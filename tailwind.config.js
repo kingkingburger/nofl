@@ -8,25 +8,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 재정의된 다크 테마 색상 팔레트 (더욱 깊이감 있는 톤)
-        // 'dark-bg': '#080808', // 가장 깊은 배경색
-        'dark-surface': '#181818', // 카드, 패널 등 표면 색상
-        'dark-bg': '#121212',   // 배경색
-        'accent': '#03DAC6',    // 폰트 및 포인트 색
-        'primary-text': '#E0E0E0',
-        'secondary-text': '#A0A0A0',
-        'accent': '#00C896', // 생동감 있는 에메랄드 그린
+        primary: '#1a1a1a',
+        secondary: '#2a2a2a',
+        accent: '#03DAC6',
+        text: '#e0e0e0',
+        'secondary-text': '#a0a0a0',
+        warning: '#FFD700',
+        'dark-bg': '#121212',
+        'dark-surface': '#1e1e1e',
         'accent-light': '#00E0A8', // 액센트의 밝은 버전
         'accent-glow': 'rgba(0, 200, 150, 0.4)',
-        'warning': '#FFD700',
         'warning-glow': 'rgba(255, 215, 0, 0.4)',
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
       },
       boxShadow: {
-        // 입체감을 위한 커스텀 그림자
-        '3xl': '0 20px 50px rgba(0, 0, 0, 0.8)', // 깊은 그림자
+        '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
         'inner-glow': 'inset 0 0 10px rgba(0, 200, 150, 0.2)', // 내부 빛 효과
       },
       keyframes: {
@@ -52,3 +50,4 @@ export default {
   },
   plugins: [],
 }
+
