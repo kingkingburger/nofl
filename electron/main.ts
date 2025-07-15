@@ -1,13 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import * as vosk from "vosk"
-import wav from 'node-wav';
-
-const VOSK_MODEL_PATH = path.resolve(app.getAppPath(), 'public', 'vosk-model-ko-0.22-small');
-vosk.setLogLevel(0);
-const model = new vosk.Model(VOSK_MODEL_PATH);
-
 
 let mainWindow: BrowserWindow | null = null;
 const currentMode = 'mini'; // 'mini' 또는 'normal'
@@ -56,15 +49,16 @@ function createWindow() {
   mainWindow?.close();
 
   mainWindow = new BrowserWindow(options);
-  
+
+  mainWindow.loadURL('http://localhost:5047');
   // 개발 서버 URL 또는 빌드된 파일 경로를 로드합니다.
-  if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    // 개발자 도구를 열고 싶다면 주석을 해제하세요.
-    // mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
-  }
+  // if (process.env.VITE_DEV_SERVER_URL) {
+  //   mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+  //   // 개발자 도구를 열고 싶다면 주석을 해제하세요.
+  //   // mainWindow.webContents.openDevTools();
+  // } else {
+  //   mainWindow.loadFile(path.join(__dirname, '../index.html'));
+  // }
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -105,29 +99,5 @@ ipcMain.on('enter-mini-mode', () => {
   if (mainWindow) {
     mainWindow.setSize(200, 400);
     mainWindow.setAlwaysOnTop(true);
-  }
-});
-
-ipcMain.on('audio-data', (event, data) => {
-  const buffer = Buffer.from(data);
-  const result = wav.decode(buffer);
-
-  if (result.channelData[0]) {
-    const rec = new vosk.Recognizer({ model: model, sampleRate: result.sampleRate });
-
-    // Convert Float32Array to 16-bit PCM Buffer
-    const pcmData = new Int16Array(result.channelData[0].length);
-    for (let i = 0; i < result.channelData[0].length; i++) {
-      pcmData[i] = Math.max(-1, Math.min(1, result.channelData[0][i])) * 32767;
-    }
-    const audioBuffer = Buffer.from(pcmData.buffer);
-
-    rec.acceptWaveform(audioBuffer);
-    const finalResult = rec.finalResult();
-    rec.free();
-
-    if (mainWindow && finalResult.text) {
-      mainWindow.webContents.send('transcript', finalResult.text);
-    }
   }
 });
