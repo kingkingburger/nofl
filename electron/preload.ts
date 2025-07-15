@@ -18,4 +18,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
    * 메인 프로세스에 미니 모드로 전환하도록 요청합니다.
    */
   enterMiniMode: () => ipcRenderer.send('enter-mini-mode'),
+
+  /**
+   * 음성 데이터를 메인 프로세스로 전송합니다.
+   * @param data - 오디오 데이터 (Blob)
+   */
+  sendAudioData: (data: Blob) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const buffer = Buffer.from(reader.result as ArrayBuffer);
+      ipcRenderer.send('audio-data', buffer);
+    };
+    reader.readAsArrayBuffer(data);
+  },
+
+  /**
+   * 메인 프로세스로부터 음성 인식 결과를 수신하는 리스너를 등록합니다.
+   * @param callback - 음성 인식 결과를 처리할 콜백 함수
+   */
+  onSpeechToTextResult: (callback: (text: string) => void) => {
+    ipcRenderer.on('speech-to-text-result', (event, text) => {
+      callback(text);
+    });
+  },
 });

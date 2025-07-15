@@ -25,6 +25,7 @@
   },
   "include": [
     "src",
+    "src/types",
     "node_modules/vitest/globals.d.ts"
   ]
 }

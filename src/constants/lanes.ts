@@ -1,4 +1,3 @@
-
 import { type Lane } from '../types/types';
 
 /**
@@ -6,11 +5,11 @@ import { type Lane } from '../types/types';
  * 각 라인은 고유 이름, 한국어 키워드, 영어 키워드를 포함합니다.
  */
 export const LANES: Lane[] = [
-  { name: '탑', kor: '탑', eng: 'top' },
-  { name: '정글', kor: '정글', eng: 'jungle' },
-  { name: '미드', kor: '미드', eng: 'mid' },
-  { name: '원딜', kor: '원딜', eng: 'bot' },
-  { name: '서폿', kor: '서폿', eng: 'support' },
+  { name: '탑', kor: '탑', eng: 'top', aliases: ['탑', 'top'] },
+  { name: '정글', kor: '정글', eng: 'jungle', aliases: ['정글', 'jungle', 'jg'] },
+  { name: '미드', kor: '미드', eng: 'mid', aliases: ['미드', 'mid'] },
+  { name: '원딜', kor: '원딜', eng: 'bot', aliases: ['원딜', 'bot', 'ad', 'adc'] },
+  { name: '서폿', kor: '서폿', eng: 'support', aliases: ['서폿', 'support', 'sup'] },
 ];
 
 /** 플래시 소환사 주문의 재사용 대기시간 (초) */

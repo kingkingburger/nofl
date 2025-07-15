@@ -1,6 +1,14 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import vosk from 'vosk';
+import wav from 'node-wav';
+import fs from 'fs';
+
+const VOSK_MODEL_PATH = path.resolve(process.cwd(), 'public', 'vosk-model-ko-0.22-small');
+vosk.setLogLevel(0);
+const model = new vosk.Model(VOSK_MODEL_PATH);
+
 
 let mainWindow: BrowserWindow | null = null;
 let currentMode = 'mini'; // 'mini' 또는 'normal'
@@ -99,5 +107,30 @@ ipcMain.on('enter-mini-mode', () => {
   if (mainWindow) {
     mainWindow.setSize(200, 400);
     mainWindow.setAlwaysOnTop(true);
+  }
+});
+
+ipcMain.on('audio-data', (event, data) => {
+  const buffer = Buffer.from(data);
+  const result = wav.decode(buffer);
+
+  if (result.sampleRate < model.sampleRate) {
+    console.warn('Original sample rate is lower than model sample rate. Up-sampling might be needed.');
+    // 간단한 업샘플링 (실제 프로덕션에서는 더 정교한 방법 사용 권장)
+    const newLength = Math.floor(result.channelData[0].length * model.sampleRate / result.sampleRate);
+    const upsampled = new Float32Array(newLength);
+    for (let i = 0; i < newLength; i++) {
+      upsampled[i] = result.channelData[0][Math.floor(i * result.sampleRate / model.sampleRate)];
+    }
+    result.channelData[0] = upsampled;
+  }
+
+  const rec = new vosk.Recognizer({ model: model, sampleRate: model.sampleRate });
+  rec.acceptWaveform(result.channelData[0]);
+  const finalResult = rec.finalResult();
+  rec.free();
+
+  if (mainWindow && finalResult.text) {
+    mainWindow.webContents.send('speech-to-text-result', finalResult.text);
   }
 });

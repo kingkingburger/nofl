@@ -25,3 +25,7 @@ dist-ssr
 
 dist-electron
 .env
+
+# Vosk 모델
+public/vosk-model-ko-0.22-small
+vosk-model.zip

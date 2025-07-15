@@ -10,15 +10,23 @@ import { useTranslation } from 'react-i18next';
 
 function App() {
   const { t } = useTranslation();
-  const { timers, toggleRecognition, isRecognizing } = useTimer();
-  const { opacity, isMiniMode, handleOpacityChange, toggleMode } = useUI();
+  const { timers, processCommand } = useTimer();
+  const { opacity, isMiniMode, handleOpacityChange, toggleMode, isRecording, startRecording, stopRecording } = useUI();
 
   useEffect(() => {
     document.body.classList.add('overflow-hidden');
+
+    const cleanup = window.electronAPI?.onSpeechToTextResult((text: string) => {
+      processCommand(text);
+    });
+
     return () => {
       document.body.classList.remove('overflow-hidden');
+      if (cleanup) {
+        cleanup();
+      }
     };
-  }, []);
+  }, [processCommand]);
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen relative z-0 animate-fade-in ${isMiniMode ? 'p-2 bg-transparent mini-mode' : 'p-8 bg-gray-900 normal-mode'}`}>
@@ -28,14 +36,11 @@ function App() {
 
       <main className="w-full max-w-6xl relative z-10">
         <TimerDashboard timers={timers} />
-        <ControlPanel isRecognizing={isRecognizing} onToggle={toggleRecognition} />
-        {!isMiniMode && (
-          <CommandEditor
-            commands={commands}
-            onAddCommand={handleAddCommand}
-            onRemoveCommand={handleRemoveCommand}
-          />
-        )}
+        <ControlPanel 
+          isRecording={isRecording} 
+          startRecording={startRecording} 
+          stopRecording={stopRecording} 
+        />
       </main>
 
       {!isMiniMode && <Footer opacity={opacity} onOpacityChange={handleOpacityChange} />}
