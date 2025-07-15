@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 let mainWindow: BrowserWindow | null = null;
-let currentMode = 'mini'; // 'mini' 또는 'normal'
+const currentMode = 'mini'; // 'mini' 또는 'normal'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,7 +49,7 @@ function createWindow() {
   mainWindow?.close();
 
   mainWindow = new BrowserWindow(options);
-  
+
   mainWindow.loadURL('http://localhost:5047');
   // 개발 서버 URL 또는 빌드된 파일 경로를 로드합니다.
   // if (process.env.VITE_DEV_SERVER_URL) {
