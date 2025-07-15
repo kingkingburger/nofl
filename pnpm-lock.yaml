@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@types/vosk':
+        specifier: ^0.3.1
+        version: 0.3.1
       extract-zip:
         specifier: ^2.0.1
         version: 2.0.1
@@ -54,6 +57,9 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.0(@testing-library/dom@10.4.0)(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@types/node-wav':
+        specifier: ^0.0.4
+        version: 0.0.4
       '@types/react':
         specifier: ^19.1.8
         version: 19.1.8
@@ -855,6 +861,9 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
+  '@types/node-wav@0.0.4':
+    resolution: {integrity: sha512-Qrnx0+32079p+1C28+Hr6HeKCSXpxRbfe0SoKmUZlsFXH61XX1afyuxE4Hdu3MtirV38M9W+2m5GbHmgPxFy1Q==}
+
   '@types/node@22.16.3':
     resolution: {integrity: sha512-sr4Xz74KOUeYadexo1r8imhRtlVXcs+j3XK3TcoiYk7B1t3YRVJgtaD3cwX73NYb71pmVuMLNRhJ9XKdoDB74g==}
 
@@ -877,6 +886,9 @@ packages:
 
   '@types/verror@1.10.11':
     resolution: {integrity: sha512-RlDm9K7+o5stv0Co8i8ZRGxDbrTxhJtgjqjFyVh/tXQyl/rYtTKlnTvZ88oSTeYREWurwx20Js4kTuKCsFkUtg==}
+
+  '@types/vosk@0.3.1':
+    resolution: {integrity: sha512-uSEegw6UgRxRI+iSTWYuk3SiQ7TEHfEFnN53Gh3y4iUfafpNv2qPWuZQ/XsQdtJzifdhrxodgHpThO0inzZmAw==}
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -3767,6 +3779,10 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
+  '@types/node-wav@0.0.4':
+    dependencies:
+      '@types/node': 24.0.13
+
   '@types/node@22.16.3':
     dependencies:
       undici-types: 6.21.0
@@ -3795,6 +3811,10 @@ snapshots:
 
   '@types/verror@1.10.11':
     optional: true
+
+  '@types/vosk@0.3.1':
+    dependencies:
+      '@types/node': 24.0.13
 
   '@types/yauzl@2.10.3':
     dependencies:
