@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
-    "dev:electron": "tsc -p electron/tsconfig.json && electron .",
+    "dev:electron": "tsc -p electron/tsconfig.json && electron dist-electron/main.js",
     "build": "tsc -b && vite build",
     "build:electron": "npm run build && electron-builder",
     "lint": "eslint .",
