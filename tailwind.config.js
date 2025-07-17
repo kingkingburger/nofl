@@ -6,13 +6,6 @@
  * https://tailwindcss.com/docs/configuration
  */
 export default {
-  /**
-   * content: Tailwind가 CSS를 생성할 때 스캔할 파일들의 경로를 지정합니다.
-   * 여기에 포함된 파일들에서 사용된 Tailwind 클래스만 최종 CSS 파일에 포함됩니다.
-   * 이를 통해 프로덕션 빌드에서 사용하지 않는 스타일을 제거(purge)하여 파일 크기를 최적화합니다.
-   * - `./index.html`: 기본 HTML 파일
-   * - `./src/**/*.{js,ts,jsx,tsx}`: src 폴더 내의 모든 JavaScript, TypeScript, JSX, TSX 파일
-   */
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
