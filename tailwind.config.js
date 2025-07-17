@@ -1,54 +1,26 @@
 
 /** @type {import('tailwindcss').Config} */
+/**
+ * Tailwind CSS 설정 파일입니다.
+ * 이 파일에서 Tailwind의 동작을 커스터마이징할 수 있습니다.
+ * https://tailwindcss.com/docs/configuration
+ */
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  /**
+   * theme: 디자인 시스템을 정의하는 곳입니다.
+   * 색상, 글꼴, 간격, 중단점(breakpoint) 등 프로젝트의 시각적 요소를 확장(extend)하거나 재정의(override)할 수 있습니다.
+   * extend: 기존 Tailwind의 기본 설정을 유지하면서 새로운 값을 추가합니다.
+   */
   theme: {
-    extend: {
-      colors: {
-        // 재정의된 다크 테마 색상 팔레트 (더욱 깊이감 있는 톤)
-        // 'dark-bg': '#080808', // 가장 깊은 배경색
-        'dark-surface': '#181818', // 카드, 패널 등 표면 색상
-        'dark-bg': '#121212',   // 배경색
-        'accent': '#03DAC6',    // 폰트 및 포인트 색
-        'primary-text': '#E0E0E0',
-        'secondary-text': '#A0A0A0',
-        'accent': '#00C896', // 생동감 있는 에메랄드 그린
-        'accent-light': '#00E0A8', // 액센트의 밝은 버전
-        'accent-glow': 'rgba(0, 200, 150, 0.4)',
-        'warning': '#FFD700',
-        'warning-glow': 'rgba(255, 215, 0, 0.4)',
-      },
-      fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
-      },
-      boxShadow: {
-        // 입체감을 위한 커스텀 그림자
-        '3xl': '0 20px 50px rgba(0, 0, 0, 0.8)', // 깊은 그림자
-        'inner-glow': 'inset 0 0 10px rgba(0, 200, 150, 0.2)', // 내부 빛 효과
-      },
-      keyframes: {
-        flash: {
-          '0%, 100%': { boxShadow: '0 0 20px var(--warning-glow)' },
-          '50%': { boxShadow: '0 0 30px rgba(255, 215, 0, 0.6)' },
-        },
-        'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 15px var(--tw-colors-accent-glow)' },
-          '50%': { boxShadow: '0 0 25px var(--tw-colors-accent-glow)' },
-        }
-      },
-      animation: {
-        flash: 'flash 1.5s infinite ease-in-out',
-        'fade-in': 'fade-in 0.5s ease-out forwards',
-        'pulse-glow': 'pulse-glow 2s infinite ease-in-out',
-      }
-    },
+    extend: {},
   },
+  /**
+   * plugins: 추가적인 기능을 제공하는 Tailwind 플러그인을 등록하는 곳입니다.
+   * 예: @tailwindcss/forms, @tailwindcss/typography 등
+   */
   plugins: [],
 }

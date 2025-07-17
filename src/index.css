@@ -1,50 +1,28 @@
-@import "tailwindcss";  /* v4 이상에서 base/components/utilities 모두 로드 */
+/**
+ * Tailwind CSS 지시문(directives) 파일입니다.
+ * 이 파일은 애플리케이션의 전역 스타일을 정의하고 Tailwind를 초기화합니다.
+ */
 
-/* 전역 스타일 및 폰트 렌더링 최적화 */
-html, body, #root {
-  background-color: #181818;
-  color: #03DAC6;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  /* overflow: hidden; 스크롤바 제거 */
-}
+/**
+ * @tailwind base;
+ * Tailwind의 기본 스타일(preflight)을 주입합니다.
+ * 브라우저 간의 불일치를 제거하고 일관된 스타일링 기반을 제공하는 CSS 리셋과 유사합니다.
+ * 예: heading, paragraph, list 등의 기본 마진과 패딩을 제거합니다.
+ */
+@tailwind base;
 
-body {
-  background: radial-gradient(circle at center, var(--tw-colors-dark-surface) 0%, var(--tw-colors-dark-bg) 100%);
-  color: var(--tw-colors-primary-text);
-  font-family: var(--tw-font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+/**
+ * @tailwind components;
+ * Tailwind의 컴포넌트 클래스를 주입합니다.
+ * 플러그인에 의해 등록된 재사용 가능한 유틸리티 클래스 집합입니다.
+ * (예: container)
+ */
+@tailwind components;
 
-/* Electron 드래그 영역 스타일 */
-.-webkit-app-region-drag {
-  -webkit-app-region: drag;
-}
-
-/* 투명도 슬라이더 트랙 및 썸 스타일 */
-input[type="range"]::-webkit-slider-runnable-track {
-  @apply bg-gray-800 rounded-full h-2 ;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-5 h-5 rounded-full -mt-1.5 border-2 shadow-md cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  @apply scale-110 shadow-lg;
-}
-
-input[type="range"]::-moz-range-track {
-  @apply bg-gray-800 rounded-full h-2 ;
-}
-
-input[type="range"]::-moz-range-thumb {
-  @apply appearance-none w-5 h-5 rounded-full -mt-1.5 border-2  shadow-md cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-input[type="range"]::-moz-range-thumb:hover {
-  @apply scale-110 shadow-lg;
-}
+/**
+ * @tailwind utilities;
+ * Tailwind의 유틸리티 클래스를 주입합니다.
+ * `text-center`, `p-4`, `flex` 등과 같이 가장 많이 사용되는 핵심 클래스들입니다.
+ * 이 지시문이 있어야 Tailwind의 모든 유틸리티를 사용할 수 있습니다.
+ */
+@tailwind utilities;
