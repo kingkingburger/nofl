@@ -1,20 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTimer } from './useTimer';
-import { FLASH_DURATION } from '../constants/lanes';
 
-// speechSynthesis를 모의(mock) 처리합니다.
-const mockSpeechSynthesis = {
-  speak: vi.fn(),
-  cancel: vi.fn(),
-  getVoices: vi.fn().mockReturnValue([]),
-};
-
-// 전역 window 객체에 모의 객체를 할당합니다.
-vi.stubGlobal('speechSynthesis', mockSpeechSynthesis);
-
-describe('useTimer 훅', () => {
+describe('useTimer', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.useFakeTimers();
   });
 
@@ -22,38 +10,69 @@ describe('useTimer 훅', () => {
     vi.useRealTimers();
   });
 
-  it('초기 상태가 올바르게 설정되어야 합니다.', () => {
-    const { result } = renderHook(() => useTimer());
-
-    Object.values(result.current.timers).forEach(timer => {
-      expect(timer.isActive).toBe(false);
-      expect(timer.remainingTime).toBe(FLASH_DURATION);
-    });
+  it('should initialize with the given initial time', () => {
+    const { result } = renderHook(() => useTimer(300));
+    expect(result.current.time).toBe(300);
+    expect(result.current.isActive).toBe(false);
   });
 
-  it('processCommand 함수가 음성 명령을 올바르게 처리해야 합니다.', () => {
-    const { result } = renderHook(() => useTimer());
-
+  it('should start the timer', () => {
+    const { result } = renderHook(() => useTimer(300));
     act(() => {
-      result.current.processCommand('탑 노플');
+      result.current.startTimer();
     });
-
-    expect(result.current.timers['탑'].isActive).toBe(true);
-    expect(result.current.timers['탑'].remainingTime).toBe(FLASH_DURATION);
-    expect(mockSpeechSynthesis.speak).toHaveBeenCalledWith('탑 타이머 시작');
+    expect(result.current.isActive).toBe(true);
   });
 
-  it('시간이 지남에 따라 타이머가 감소해야 합니다.', () => {
-    const { result } = renderHook(() => useTimer());
-
+  it('should decrease the time every second when the timer is active', () => {
+    const { result } = renderHook(() => useTimer(300));
     act(() => {
-      result.current.processCommand('미드 노플');
+      result.current.startTimer();
     });
-
     act(() => {
       vi.advanceTimersByTime(1000);
     });
+    expect(result.current.time).toBe(299);
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(result.current.time).toBe(297);
+  });
 
-    expect(result.current.timers['미드'].remainingTime).toBe(FLASH_DURATION - 1);
+  it('should not decrease the time below zero', () => {
+    const { result } = renderHook(() => useTimer(1));
+    act(() => {
+      result.current.startTimer();
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(result.current.time).toBe(0);
+  });
+
+  it('should stop the timer when time reaches zero', () => {
+    const { result } = renderHook(() => useTimer(1));
+    act(() => {
+      result.current.startTimer();
+    });
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(result.current.isActive).toBe(false);
+  });
+
+  it('should reset the timer to the initial time', () => {
+    const { result } = renderHook(() => useTimer(300));
+    act(() => {
+      result.current.startTimer();
+    });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    act(() => {
+      result.current.resetTimer();
+    });
+    expect(result.current.time).toBe(300);
+    expect(result.current.isActive).toBe(false);
   });
 });

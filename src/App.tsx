@@ -1,59 +1,82 @@
-import { useEffect } from 'react';
-import TimerDashboard from './components/TimerDashboard';
-import ControlPanel from './components/ControlPanel';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { useTimer } from './hooks/useTimer';
-import { useUI } from './hooks/useUI';
-import { FaWindowMinimize, FaWindowMaximize } from 'react-icons/fa';
-import { useTranslation } from 'react-i18next';
+import React, { useRef } from 'react';
+import { Timer } from './components/Timer';
+import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
-function App() {
-  const { t } = useTranslation();
-  const { timers, processCommand } = useTimer();
-  const { opacity, isMiniMode, handleOpacityChange, toggleMode, isRecording, startRecording, stopRecording } = useUI();
+/**
+ * @description The main application component.
+ * This component orchestrates the entire application, integrating the Timer components
+ * for each lane and the speech recognition functionality to control them.
+ * It serves as the central hub of the user interface.
+ */
+const App: React.FC = () => {
+  // An object to hold references to each Timer component's control functions.
+  // This allows the parent App component to trigger actions on child Timer components.
+  const timerRefs = {
+    '탑': useRef<any>(null),
+    '정글': useRef<any>(null),
+    '미드': useRef<any>(null),
+    '원딜': useRef<any>(null),
+    '서폿': useRef<any>(null),
+  };
 
-  useEffect(() => {
-    document.body.classList.add('overflow-hidden');
+  /**
+   * @description Callback function that is executed when a speech command is recognized.
+   * It finds the corresponding timer reference and calls its start function.
+   * @param {string} lane The lane name recognized from the speech command.
+   */
+  const handleCommand = (lane: string) => {
+    const timerRef = timerRefs[lane as keyof typeof timerRefs];
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
 
-    const cleanup = window.electronAPI?.onSpeechToTextResult((text: string) => {
-      processCommand(text);
-    });
+  // Initialize the speech recognition hook.
+  const { isListening, startListening, stopListening, isAPIAvailable } = useSpeechRecognition({ onCommand: handleCommand });
 
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-      if (cleanup) {
-        cleanup();
-      }
-    };
-  }, [processCommand]);
+  // An array defining the lanes to be displayed.
+  // This makes it easy to add or remove lanes in the future.
+  const lanes = ['탑', '정글', '미드', '원딜', '서폿'];
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen relative z-0 animate-fade-in ${isMiniMode ? 'p-2 bg-transparent mini-mode' : 'p-8 bg-gray-900 normal-mode'}`}>
-      <div className="fixed top-0 left-0 w-full h-8 -webkit-app-region-drag z-50"></div>
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 font-sans">
+      <header className="w-full max-w-2xl mb-8 text-center">
+        <h1 className="text-5xl font-bold text-yellow-500 tracking-wider">LoL Flash Timer</h1>
+        <p className="text-gray-400 mt-2">Say "[Lane Name] no flash" to start the timer.</p>
+      </header>
 
-      {!isMiniMode && <Header />}
-
-      <main className="w-full max-w-6xl relative z-10">
-        <TimerDashboard timers={timers} />
-        <ControlPanel 
-          isRecording={isRecording} 
-          startRecording={startRecording} 
-          stopRecording={stopRecording} 
-        />
+      <main className="w-full max-w-2xl space-y-4">
+        {/* Map over the lanes array to render a Timer component for each one. */}
+        {lanes.map((lane) => (
+          <Timer
+            key={lane}
+            lane={lane}
+            initialTime={300} // 5 minutes in seconds
+            ref={timerRefs[lane as keyof typeof timerRefs]} // Assign the ref to the component
+          />
+        ))}
       </main>
 
-      {!isMiniMode && <Footer opacity={opacity} onOpacityChange={handleOpacityChange} />}
-
-      <button 
-        onClick={toggleMode} 
-        className="fixed top-2 right-2 z-50 p-2 bg-gray-700 rounded-full text-white hover:bg-gray-600 transition-colors"
-        title={isMiniMode ? t('normal_mode') : t('mini_mode')}
-      >
-        {isMiniMode ? <FaWindowMaximize /> : <FaWindowMinimize />}
-      </button>
+      <footer className="mt-8">
+        {!isAPIAvailable && (
+          <p className="text-center text-red-500 mb-4">Speech Recognition API is not supported in your browser.</p>
+        )}
+        <button
+          onClick={isListening ? stopListening : startListening}
+          disabled={!isAPIAvailable} // Disable button if API is not available
+          className={`px-8 py-4 rounded-full font-bold text-xl transition-all duration-300 transform hover:scale-105 ${
+            isListening
+              ? 'bg-red-700 hover:bg-red-800 shadow-lg'
+              : 'bg-green-600 hover:bg-green-700 shadow-md'
+          } ${
+            !isAPIAvailable ? 'opacity-50 cursor-not-allowed' : ''
+          }`}>
+          {isListening ? 'Stop Listening' : 'Start Voice Command'}
+        </button>
+        {isListening && <p className="text-center mt-4 text-green-400 animate-pulse">Listening...</p>}
+      </footer>
     </div>
   );
-}
+};
 
 export default App;
