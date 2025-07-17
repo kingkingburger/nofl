@@ -1,61 +1,82 @@
-import React, { useState } from 'react';
-import TimerDashboard from './components/TimerDashboard';
-import ControlPanel from './components/ControlPanel';
-import { useTimer } from './hooks/useTimer';
-import { FaSun } from 'react-icons/fa';
+import React, { useRef } from 'react';
+import { Timer } from './components/Timer';
+import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
 /**
- * 노플 애플리케이션의 메인 컴포넌트입니다.
- * 전체 레이아웃을 구성하고, useTimer 훅을 통해 모든 상태와 로직을 관리합니다.
+ * @description The main application component.
+ * This component orchestrates the entire application, integrating the Timer components
+ * for each lane and the speech recognition functionality to control them.
+ * It serves as the central hub of the user interface.
  */
-function App() {
-  const { timers, toggleRecognition, isRecognizing } = useTimer();
-  const [opacity, setOpacity] = useState(1);
+const App: React.FC = () => {
+  // An object to hold references to each Timer component's control functions.
+  // This allows the parent App component to trigger actions on child Timer components.
+  const timerRefs = {
+    '탑': useRef<any>(null),
+    '정글': useRef<any>(null),
+    '미드': useRef<any>(null),
+    '원딜': useRef<any>(null),
+    '서폿': useRef<any>(null),
+  };
 
-  const handleOpacityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newOpacity = parseFloat(event.target.value);
-    setOpacity(newOpacity);
-    // preload를 통해 노출된 setOpacity 함수 호출
-    if (window.electronAPI) {
-      window.electronAPI.setOpacity(newOpacity);
+  /**
+   * @description Callback function that is executed when a speech command is recognized.
+   * It finds the corresponding timer reference and calls its start function.
+   * @param {string} lane The lane name recognized from the speech command.
+   */
+  const handleCommand = (lane: string) => {
+    const timerRef = timerRefs[lane as keyof typeof timerRefs];
+    if (timerRef.current) {
+      timerRef.current.startTimer();
     }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 relative z-0 animate-fade-in">
-      {/* 창을 드래그할 수 있는 영역 */}
-      <div className="fixed top-0 left-0 w-full h-8 -webkit-app-region-drag z-50"></div>
+  // Initialize the speech recognition hook.
+  const { isListening, startListening, stopListening, isAPIAvailable } = useSpeechRecognition({ onCommand: handleCommand });
 
-      <header className="mb-16 text-center relative z-10">
-        <h1 className="text-6xl font-extrabold text-accent tracking-wider mb-2 drop-shadow-lg leading-tight">
-          NO FLASH
-        </h1>
-        <p className="text-lg text-secondary-text opacity-90">
-          "라인명 노플" 또는 "Lane name no flash"
-        </p>
+  // An array defining the lanes to be displayed.
+  // This makes it easy to add or remove lanes in the future.
+  const lanes = ['탑', '정글', '미드', '원딜', '서폿'];
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 font-sans">
+      <header className="w-full max-w-2xl mb-8 text-center">
+        <h1 className="text-5xl font-bold text-yellow-500 tracking-wider">LoL Flash Timer</h1>
+        <p className="text-gray-400 mt-2">Say "[Lane Name] no flash" to start the timer.</p>
       </header>
-      <main className="w-full max-w-6xl relative z-10">
-        <TimerDashboard timers={timers} />
-        <ControlPanel isRecognizing={isRecognizing} onToggle={toggleRecognition} />
+
+      <main className="w-full max-w-2xl space-y-4">
+        {/* Map over the lanes array to render a Timer component for each one. */}
+        {lanes.map((lane) => (
+          <Timer
+            key={lane}
+            lane={lane}
+            initialTime={300} // 5 minutes in seconds
+            ref={timerRefs[lane as keyof typeof timerRefs]} // Assign the ref to the component
+          />
+        ))}
       </main>
 
-      {/* 투명도 조절 슬라이더 */}
-      <footer className="fixed bottom-5 left-1/2 -translate-x-1/2 w-80 z-40">
-        <div className="flex items-center gap-4 bg-dark-surface bg-opacity-80 p-3 rounded-full shadow-3xl backdrop-blur-md border border-gray-700">
-          <FaSun className="text-xl text-secondary-text" />
-          <input
-            type="range"
-            min="0.1"
-            max="1.0"
-            step="0.05"
-            value={opacity}
-            onChange={handleOpacityChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
+      <footer className="mt-8">
+        {!isAPIAvailable && (
+          <p className="text-center text-red-500 mb-4">Speech Recognition API is not supported in your browser.</p>
+        )}
+        <button
+          onClick={isListening ? stopListening : startListening}
+          disabled={!isAPIAvailable} // Disable button if API is not available
+          className={`px-8 py-4 rounded-full font-bold text-xl transition-all duration-300 transform hover:scale-105 ${
+            isListening
+              ? 'bg-red-700 hover:bg-red-800 shadow-lg'
+              : 'bg-green-600 hover:bg-green-700 shadow-md'
+          } ${
+            !isAPIAvailable ? 'opacity-50 cursor-not-allowed' : ''
+          }`}>
+          {isListening ? 'Stop Listening' : 'Start Voice Command'}
+        </button>
+        {isListening && <p className="text-center mt-4 text-green-400 animate-pulse">Listening...</p>}
       </footer>
     </div>
   );
-}
+};
 
 export default App;
