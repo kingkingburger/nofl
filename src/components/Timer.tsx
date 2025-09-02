@@ -47,18 +47,12 @@ export const Timer = forwardRef<TimerRef, TimerProps>(({ lane, initialTime }, re
   }));
 
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg shadow-lg text-white font-mono">
+    <div
+      onClick={isActive ? resetTimer : startTimer}
+      className="flex items-center justify-between p-4 bg-gray-800 rounded-lg shadow-lg text-white font-mono cursor-pointer"
+    >
       <span className="text-xl font-bold text-yellow-400">{lane}</span>
       <span className="text-2xl font-semibold">{formatTime(time)}</span>
-      <button
-        onClick={isActive ? resetTimer : startTimer}
-        className={`px-4 py-2 rounded-md font-bold transition-colors duration-300 ${
-          isActive
-            ? 'bg-red-600 hover:bg-red-700'
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`}>
-        {isActive ? 'Reset' : 'Start'}
-      </button>
     </div>
   );
 });
