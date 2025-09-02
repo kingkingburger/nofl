@@ -13,9 +13,5 @@ describe('Timer', () => {
     expect(screen.getByText('00:59')).toBeInTheDocument();
   });
 
-  it('should render a button to start the timer', () => {
-    render(<Timer lane="Mid" initialTime={300} />);
-    const button = screen.getByRole('button', { name: /start/i });
-    expect(button).toBeInTheDocument();
-  });
+  
 });

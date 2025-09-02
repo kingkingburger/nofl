@@ -31,8 +31,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Initialize the speech recognition hook.
-  const { isListening, startListening, stopListening, isAPIAvailable } = useSpeechRecognition({ onCommand: handleCommand });
 
   // An array defining the lanes to be displayed.
   // This makes it easy to add or remove lanes in the future.
