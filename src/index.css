@@ -1,28 +1,13 @@
-/**
- * Tailwind CSS 지시문(directives) 파일입니다.
- * 이 파일은 애플리케이션의 전역 스타일을 정의하고 Tailwind를 초기화합니다.
- */
-
-/**
- * @tailwind base;
- * Tailwind의 기본 스타일(preflight)을 주입합니다.
- * 브라우저 간의 불일치를 제거하고 일관된 스타일링 기반을 제공하는 CSS 리셋과 유사합니다.
- * 예: heading, paragraph, list 등의 기본 마진과 패딩을 제거합니다.
- */
+/* src/index.css */
 @tailwind base;
-
-/**
- * @tailwind components;
- * Tailwind의 컴포넌트 클래스를 주입합니다.
- * 플러그인에 의해 등록된 재사용 가능한 유틸리티 클래스 집합입니다.
- * (예: container)
- */
 @tailwind components;
-
-/**
- * @tailwind utilities;
- * Tailwind의 유틸리티 클래스를 주입합니다.
- * `text-center`, `p-4`, `flex` 등과 같이 가장 많이 사용되는 핵심 클래스들입니다.
- * 이 지시문이 있어야 Tailwind의 모든 유틸리티를 사용할 수 있습니다.
- */
 @tailwind utilities;
+
+body {
+  /* 앱 프레임을 돋보이게 할 배경색 */
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle at center, #1a1a1a, #0a0a0a);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #f0f0f0;
+}
