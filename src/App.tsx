@@ -1,80 +1,61 @@
-import React, { useRef } from 'react';
-import { Timer } from './components/Timer';
-import { useSpeechRecognition } from './hooks/useSpeechRecognition';
+import LaneTimer from './components/LaneTimer';
 
-/**
- * @description The main application component.
- * This component orchestrates the entire application, integrating the Timer components
- * for each lane and the speech recognition functionality to control them.
- * It serves as the central hub of the user interface.
- */
-const App: React.FC = () => {
-  // An object to hold references to each Timer component's control functions.
-  // This allows the parent App component to trigger actions on child Timer components.
-  const timerRefs = {
-    '탑': useRef<any>(null),
-    '정글': useRef<any>(null),
-    '미드': useRef<any>(null),
-    '원딜': useRef<any>(null),
-    '서폿': useRef<any>(null),
-  };
+import topIcon from './assets/icon_top.png';
+import jungleIcon from './assets/icon_jungle.png';
+import midIcon from './assets/icon_mid.png';
+import botIcon from './assets/icon_bot.png';
+import supportIcon from './assets/icon_sup.png';
 
-  /**
-   * @description Callback function that is executed when a speech command is recognized.
-   * It finds the corresponding timer reference and calls its start function.
-   * @param {string} lane The lane name recognized from the speech command.
-   */
-  const handleCommand = (lane: string) => {
-    const timerRef = timerRefs[lane as keyof typeof timerRefs];
-    if (timerRef.current) {
-      timerRef.current.startTimer();
-    }
-  };
+const lanes = [
+  { name: 'TOP', icon: topIcon },
+  { name: 'JGL', icon: jungleIcon },
+  { name: 'MID', icon: midIcon },
+  { name: 'BOT', icon: botIcon },
+  { name: 'SUP', icon: supportIcon },
+] as const;
 
-
-  // An array defining the lanes to be displayed.
-  // This makes it easy to add or remove lanes in the future.
-  const lanes = ['탑', '정글', '미드', '원딜', '서폿'];
-
+function App() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 font-sans">
-      <header className="w-full max-w-2xl mb-8 text-center">
-        <h1 className="text-5xl font-bold text-yellow-500 tracking-wider">LoL Flash Timer</h1>
-        <p className="text-gray-400 mt-2">Say "[Lane Name] no flash" to start the timer.</p>
-      </header>
+      // 전체 페이지를 중앙 정렬하는 컨테이너
+      <div className="min-h-screen w-full flex items-center justify-center p-4 font-sans">
 
-      <main className="w-full max-w-2xl space-y-4">
-        {/* Map over the lanes array to render a Timer component for each one. */}
-        {lanes.map((lane) => (
-          <Timer
-            key={lane}
-            lane={lane}
-            initialTime={300} // 5 minutes in seconds
-            ref={timerRefs[lane as keyof typeof timerRefs]} // Assign the ref to the component
-          />
-        ))}
-      </main>
+        {/* 가상의 모바일 프레임 */}
+        <div className="
+        relative w-full max-w-sm aspect-[9/19.5] bg-deep-dark
+        rounded-[2.5rem] shadow-2xl shadow-black/40
+        flex flex-col overflow-hidden ring-1 ring-white/10
+      ">
+          {/* 다이나믹 아일랜드 시뮬레이션 */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 h-8 w-32 bg-black rounded-full z-20"></div>
 
-      <footer className="mt-8">
-        {!isAPIAvailable && (
-          <p className="text-center text-red-500 mb-4">Speech Recognition API is not supported in your browser.</p>
-        )}
-        <button
-          onClick={isListening ? stopListening : startListening}
-          disabled={!isAPIAvailable} // Disable button if API is not available
-          className={`px-8 py-4 rounded-full font-bold text-xl transition-all duration-300 transform hover:scale-105 ${
-            isListening
-              ? 'bg-red-700 hover:bg-red-800 shadow-lg'
-              : 'bg-green-600 hover:bg-green-700 shadow-md'
-          } ${
-            !isAPIAvailable ? 'opacity-50 cursor-not-allowed' : ''
-          }`}>
-          {isListening ? 'Stop Listening' : 'Start Voice Command'}
-        </button>
-        {isListening && <p className="text-center mt-4 text-green-400 animate-pulse">Listening...</p>}
-      </footer>
-    </div>
+          {/* 스크롤 가능한 앱 내부 콘텐츠 영역 */}
+          <div className="flex-grow overflow-y-auto pb-8">
+            <header className="text-center mt-20 mb-8 px-6">
+              <h1 className="text-4xl font-bold tracking-wider text-accent-gold [text-shadow:_0_1px_10px_var(--tw-shadow-color)] shadow-accent-gold/30">
+                FLASH TIMER
+              </h1>
+              <p className="text-light-gray mt-2 text-sm">
+                Click on a lane to start the 5-minute timer.
+              </p>
+            </header>
+
+            <main className="w-full px-4">
+              <div className="space-y-4">
+                {lanes.map((lane) => (
+                    <LaneTimer key={lane.name} lane={lane.name} icon={lane.icon} />
+                ))}
+              </div>
+            </main>
+          </div>
+
+          {/* 하단 홈 바 시뮬레이션 */}
+          <footer className="w-full flex-shrink-0 h-8 flex items-center justify-center pb-4">
+            <div className="w-36 h-[5px] bg-white/40 rounded-full"></div>
+          </footer>
+        </div>
+
+      </div>
   );
-};
+}
 
 export default App;
