@@ -1,4 +1,5 @@
 import { useTimer } from '../hooks/useTimer';
+import {formatTime} from "../utils/time/formatTime.ts";
 
 interface LaneTimerProps {
   lane: 'TOP' | 'JGL' | 'MID' | 'BOT' | 'SUP';
@@ -6,7 +7,7 @@ interface LaneTimerProps {
 }
 
 const LaneTimer = ({ lane, icon }: LaneTimerProps) => {
-  const { timeLeft, isActive, startTimer, formatTime, progress } = useTimer(); // 5분 = 300초
+  const { timeLeft, isActive, startTimer, progress } = useTimer(); // 5분 = 300초
 
   const containerClasses = `
     relative w-full h-24 rounded-2xl flex items-center p-4

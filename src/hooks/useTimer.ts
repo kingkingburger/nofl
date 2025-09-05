@@ -1,4 +1,3 @@
-// src/hooks/useTimer.ts
 import { useState, useEffect, useRef } from 'react';
 
 const FLASH_COOLDOWN = 300; // 5분 = 300초
@@ -6,7 +5,7 @@ const FLASH_COOLDOWN = 300; // 5분 = 300초
 export const useTimer = () => {
   const [timeLeft, setTimeLeft] = useState<number>(FLASH_COOLDOWN);
   const [isActive, setIsActive] = useState<boolean>(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (isActive) {
@@ -36,13 +35,8 @@ export const useTimer = () => {
     }
   };
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   const progress = isActive ? ((FLASH_COOLDOWN - timeLeft) / FLASH_COOLDOWN) * 100 : 0;
 
-  return { timeLeft, isActive, startTimer, formatTime, progress };
+  return { timeLeft, isActive, startTimer,  progress };
 };
