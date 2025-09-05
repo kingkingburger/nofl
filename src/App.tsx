@@ -23,7 +23,7 @@ function App() {
         <div className="
         max-w-lg bg-deep-dark
         rounded-[2.5rem] shadow-2xl shadow-black/40
-        flex flex-col overflow-hidden ring-1 ring-white/10 space-x-4
+        flex flex-col overflow-hidden space-x-4
       ">
           {/* 다이나믹 아일랜드 시뮬레이션 */}
           <div className="top-4 left-1/2 -translate-x-1/2 h-8 w-32 bg-black rounded-full z-20"></div>
