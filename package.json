@@ -9,11 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "tailwind:init": "tailwindcss init -p",
-      "test": "vitest",
-      "embed-wasm": "node scripts/embed-wasm.js",
-      "embed-whisper": "node scripts/embed-wasm.js stream.wasm public/whisper/stream-embedded.js WhisperModule",
-      "download-wasm": "curl -L -o stream.wasm https://whisper.ggerganov.com/stream.wasm && curl -L -o stream.js https://whisper.ggerganov.com/stream.js",
-      "prepare-whisper": "npm run download-wasm && npm run embed-whisper"
+    "test": "vitest",
+    "embed-wasm": "node scripts/embed-wasm.js",
+    "embed-whisper": "node scripts/embed-wasm.js stream.wasm public/whisper/stream-embedded.js WhisperModule",
+    "download-wasm": "curl -L -o stream.wasm https://whisper.ggerganov.com/stream.wasm && curl -L -o stream.js https://whisper.ggerganov.com/stream.js",
+    "prepare-whisper": "npm run download-wasm && npm run embed-whisper"
   },
   "dependencies": {
     "react": "^19.1.0",
