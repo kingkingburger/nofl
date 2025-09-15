@@ -1,0 +1,78 @@
+.container {
+  background-color: #f0f4f8;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 20px auto;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  color: #1e293b;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.status {
+  color: #475569;
+  font-size: 1rem;
+  min-height: 24px;
+  margin-bottom: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #3b82f6;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.stopButton {
+  background-color: #ef4444;
+}
+
+.stopButton:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.transcriptContainer {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.transcriptTitle {
+  font-size: 1.1rem;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.transcriptText {
+  font-size: 1rem;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
