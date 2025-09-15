@@ -42,6 +42,7 @@ export const useWhisper = () => {
     const whisperWorker = new Worker('/whisper/whisper.worker.js', {
       type: 'module'
     });
+    console.log('whisperWorker = ' , whisperWorker);
 
     whisperWorker.onmessage = (event: MessageEvent<WhisperEventData | any>) => {
       const { type, payload, message } = event.data;
