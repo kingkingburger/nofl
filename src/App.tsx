@@ -1,4 +1,5 @@
 import LaneTimer from './components/LaneTimer';
+import VoiceControl from './components/VoiceControl/VoiceControl';
 
 import topIcon from './assets/icon_top.png';
 import jungleIcon from './assets/icon_jungle.png';
@@ -39,7 +40,8 @@ function App() {
               </p>
             </header>
 
-            <main className=" flex-grow flex items-center">
+            <main className=" flex-grow flex flex-col items-center">
+              <VoiceControl />
               <div className=" space-y-4">
                 {lanes.map((lane) => (
                     <LaneTimer key={lane.name} lane={lane.name} icon={lane.icon} />
