@@ -43,8 +43,14 @@ export const useWhisper = () => {
       type: 'module'
     });
 
-    whisperWorker.onmessage = (event: MessageEvent<WhisperEventData>) => {
-      const { type, payload } = event.data;
+    whisperWorker.onmessage = (event: MessageEvent<WhisperEventData | any>) => {
+      const { type, payload, message } = event.data;
+
+      // Handle worker log messages
+      if (type === 'log') {
+        console.log('Worker Log:', message);
+        return;
+      }
 
       if (type === 'load') {
         if (payload.status === 'complete') {
@@ -54,6 +60,9 @@ export const useWhisper = () => {
           console.log('Whisper model loaded.');
         } else if (payload.status === 'progress') {
           setLoadingProgress(payload.progress || 0);
+          if (payload.message) {
+            console.log('Loading progress:', payload.message);
+          }
         } else if (payload.status === 'error') {
           setIsModelLoading(false);
           setError(payload.error || 'Failed to load model');

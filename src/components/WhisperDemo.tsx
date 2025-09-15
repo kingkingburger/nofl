@@ -78,6 +78,18 @@ const WhisperDemo: React.FC = () => {
             <p className="text-red-800">
               <span className="font-medium">오류:</span> {error}
             </p>
+            <details className="mt-2">
+              <summary className="text-sm text-red-600 cursor-pointer">문제 해결 도움말</summary>
+              <div className="mt-2 text-sm text-red-700">
+                <p>일반적인 해결 방법:</p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>브라우저를 새로고침해 보세요</li>
+                  <li>마이크 권한이 허용되어 있는지 확인하세요</li>
+                  <li>HTTPS 환경에서 실행되는지 확인하세요</li>
+                  <li>브라우저 콘솔에서 자세한 오류를 확인하세요</li>
+                </ul>
+              </div>
+            </details>
           </div>
         )}
 
