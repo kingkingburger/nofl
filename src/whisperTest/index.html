@@ -1,490 +1,333 @@
-<!doctype html>
-<html lang="en-us">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <title>stream : Real-time Whisper transcription in WebAssembly</title>
-
+  <meta charset="UTF-8">
+  <title>Whisper.cpp 실시간 음성 인식</title>
   <style>
-    #output {
-      width: 100%;
-      height: 100%;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2em;
+      max-width: 1200px;
       margin: 0 auto;
-      margin-top: 10px;
-      border-left: 0px;
-      border-right: 0px;
-      padding-left: 0px;
-      padding-right: 0px;
-      display: block;
-      background-color: black;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       color: white;
-      font-size: 10px;
-      font-family: 'Lucida Console', Monaco, monospace;
-      outline: none;
-      white-space: pre;
-      overflow-wrap: normal;
-      overflow-x: scroll;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2em;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2em;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .section {
+      margin-bottom: 2em;
+      padding: 1.5em;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      color: #fff;
+      font-size: 1.5em;
+    }
+
+    select, button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      min-width: 300px;
+    }
+
+    button {
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #progress-container {
+      margin-top: 1em;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1em;
+      border-radius: 10px;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 30px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #progress-bar::-webkit-progress-bar {
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #progress-bar::-webkit-progress-value {
+      border-radius: 15px;
+      background: linear-gradient(90deg, #4ECDC4, #44A08D);
+    }
+
+    .recording-controls {
+      display: flex;
+      gap: 1em;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .audio-level-container {
+      margin: 1em 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+    }
+
+    #audio-level {
+      height: 100%;
+      background: linear-gradient(90deg, #4ECDC4, #FF6B6B);
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    #transcription {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 1.5em;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .transcription-item {
+      margin-bottom: 1em;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid #4ECDC4;
+    }
+
+    .transcription-item strong {
+      color: #4ECDC4;
+    }
+
+    #status {
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .status-container {
+      text-align: center;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .recording {
+      animation: pulse 2s infinite;
     }
   </style>
-  <script src="../coi-serviceworker.js"></script>
-  <link rel="icon" href="data:,">
 </head>
 <body>
-<div id="main-container">
-  <b>stream : Real-time Whisper transcription in WebAssembly</b>
+<div class="container">
+  <h1>🎤 Whisper.cpp 실시간 음성 인식</h1>
 
-  <br><br>
+  <div class="section" style="background: rgba(255, 255, 255, 0.1); padding: 1em; border-radius: 10px; margin-bottom: 1em;">
+    <h3 style="margin-top: 0; color: #4ECDC4;">🔧 설치 및 사용 안내</h3>
+    <div style="font-size: 14px; line-height: 1.6;">
+      <div style="background: rgba(0,0,0,0.2); padding: 1em; border-radius: 8px; margin-bottom: 1em;">
+        <p style="margin: 0; color: #4ECDC4;"><strong>📋 whisper.cpp 빌드 및 실행 방법:</strong></p>
+        <pre style="font-size: 12px; overflow-x: auto; margin: 0.5em 0; color: #ccc;">
+# 1. whisper.cpp 클론 및 빌드
+git clone https://github.com/ggml-org/whisper.cpp
+cd whisper.cpp
+mkdir build-em && cd build-em
+emcmake cmake ..
+make -j
 
-  You can find more about this project on <a href="https://github.com/ggerganov/whisper.cpp/tree/master/examples/stream.wasm">GitHub</a>.
+# 2. 서버 실행 (whisper.cpp/examples 폴더에서)
+python3 server.py
 
-  <br><br>
+# 3. 브라우저에서 접속
+# http://localhost:8000/whisper.cpp/</pre>
+      </div>
 
-  <b>More examples:</b>
-  <a href="../">main</a> |
-  <a href="../bench.wasm/">bench</a> |
-  <a href="../stream.wasm">stream</a> |
-  <a href="../command.wasm/">command</a> |
+      <p><strong>🌐 로컬 서버 없이 사용:</strong></p>
+      <ul style="margin: 0.5em 0; padding-left: 1.5em;">
+        <li>CDN에서 자동으로 WASM 파일을 로드합니다</li>
+        <li>네트워크 연결이 필요합니다</li>
+        <li>로컬 서버보다 느릴 수 있습니다</li>
+      </ul>
 
-  <br><br>
+      <p><strong>⚙️ 시스템 요구사항:</strong></p>
+      <ul style="margin: 0.5em 0; padding-left: 1.5em;">
+        <li>WASM SIMD 지원 브라우저 (Chrome 권장)</li>
+        <li>SharedArrayBuffer 지원 (HTTPS 또는 localhost 필요)</li>
+        <li>최소 2GB RAM (small 모델 사용 시)</li>
+      </ul>
 
-  <hr>
-
-  Select the model you would like to use, click the "Start" button and start speaking
-
-  <br><br>
-
-  <div id="model-whisper">
-    Whisper model: <span id="model-whisper-status"></span>
-    <button id="fetch-whisper-tiny-en" onclick="loadWhisper('tiny.en')">tiny.en (75 MB)</button>
-    <button id="fetch-whisper-base-en" onclick="loadWhisper('base.en')">base.en (142 MB)</button>
-    <button id="fetch-whisper-base" onclick="loadWhisper('base')">base (142 MB)</button>
-    <br><br>
-    Quantized models:<br><br>
-    <button id="fetch-whisper-tiny-en-q5_1"   onclick="loadWhisper('tiny-en-q5_1')">tiny.en (Q5_1, 31 MB)</button>
-    <button id="fetch-whisper-base-en-q5_1"   onclick="loadWhisper('base-en-q5_1')">base.en (Q5_1, 57 MB)</button>
-    <span id="fetch-whisper-progress"></span>
-
-    <!--
-        <input type="file" id="file" name="file" onchange="loadFile(event, 'whisper.bin')" />
-    -->
+      <p style="margin-bottom: 0;"><strong>📊 지원 모델:</strong> tiny (39MB), base (74MB), small (244MB) - 최대 120초 오디오</p>
+    </div>
   </div>
 
-  <table>
-    <tr>
-      <td>
-        Language:
-        <select id="language" name="language">
-          <option value="en">English</option>
-          <option value="ar">Arabic</option>
-          <option value="hy">Armenian</option>
-          <option value="az">Azerbaijani</option>
-          <option value="eu">Basque</option>
-          <option value="be">Belarusian</option>
-          <option value="bn">Bengali</option>
-          <option value="bg">Bulgarian</option>
-          <option value="ca">Catalan</option>
-          <option value="zh">Chinese</option>
-          <option value="hr">Croatian</option>
-          <option value="cs">Czech</option>
-          <option value="da">Danish</option>
-          <option value="nl">Dutch</option>
-          <option value="en">English</option>
-          <option value="et">Estonian</option>
-          <option value="tl">Filipino</option>
-          <option value="fi">Finnish</option>
-          <option value="fr">French</option>
-          <option value="gl">Galician</option>
-          <option value="ka">Georgian</option>
-          <option value="de">German</option>
-          <option value="el">Greek</option>
-          <option value="gu">Gujarati</option>
-          <option value="iw">Hebrew</option>
-          <option value="hi">Hindi</option>
-          <option value="hu">Hungarian</option>
-          <option value="is">Icelandic</option>
-          <option value="id">Indonesian</option>
-          <option value="ga">Irish</option>
-          <option value="it">Italian</option>
-          <option value="ja">Japanese</option>
-          <option value="kn">Kannada</option>
-          <option value="ko">Korean</option>
-          <option value="la">Latin</option>
-          <option value="lv">Latvian</option>
-          <option value="lt">Lithuanian</option>
-          <option value="mk">Macedonian</option>
-          <option value="ms">Malay</option>
-          <option value="mt">Maltese</option>
-          <option value="no">Norwegian</option>
-          <option value="fa">Persian</option>
-          <option value="pl">Polish</option>
-          <option value="pt">Portuguese</option>
-          <option value="ro">Romanian</option>
-          <option value="ru">Russian</option>
-          <option value="sr">Serbian</option>
-          <option value="sk">Slovak</option>
-          <option value="sl">Slovenian</option>
-          <option value="es">Spanish</option>
-          <option value="sw">Swahili</option>
-          <option value="sv">Swedish</option>
-          <option value="ta">Tamil</option>
-          <option value="te">Telugu</option>
-          <option value="th">Thai</option>
-          <option value="tr">Turkish</option>
-          <option value="uk">Ukrainian</option>
-          <option value="ur">Urdu</option>
-          <option value="vi">Vietnamese</option>
-          <option value="cy">Welsh</option>
-          <option value="yi">Yiddish</option>
-        </select>
-      </td>
-    </tr>
-  </table>
+  <div class="section">
+    <h2>📥 모델 다운로드</h2>
+    <div style="margin-bottom: 1em;">
+      <label for="model-select">모델 선택 (한국어 지원):</label><br>
+      <select id="model-select"></select>
+    </div>
 
-  <br>
+    <button id="download-btn">선택한 모델 다운로드</button>
 
-  <div id="input">
-    <button id="start"  onclick="onStart()" disabled>Start</button>
-    <button id="stop"   onclick="onStop()" disabled>Stop</button>
-    <button id="clear"  onclick="clearCache()">Clear Cache</button>
+    <div id="progress-container" style="display: none;">
+      <p id="progress-text">다운로드 중...</p>
+      <progress id="progress-bar" value="0" max="100"></progress>
+    </div>
   </div>
 
-  <br>
+  <div class="section">
+    <h2>🎙️ 음성 인식</h2>
+    <div class="recording-controls">
+      <button id="start-recording" disabled>🔴 녹음 시작</button>
+      <button id="stop-recording" disabled>⏹️ 녹음 중지</button>
+    </div>
 
-  <div id="state">
-    Status: <b><span id="state-status">not started</span></b>
+    <div class="audio-level-container">
+      <div id="audio-level"></div>
+    </div>
 
-    <pre id="state-transcribed">[The transcribed text will be displayed here]</pre>
+    <p style="text-align: center; font-size: 14px; opacity: 0.8;">
+      📌 팁: 명확하게 한국어로 말해보세요. 실시간으로 텍스트가 나타납니다.
+    </p>
   </div>
 
-  <hr>
+  <div class="section">
+    <h2>📝 인식 결과</h2>
+    <div id="transcription">
+      <p style="text-align: center; opacity: 0.6;">음성 인식 결과가 여기에 실시간으로 표시됩니다...</p>
+    </div>
+  </div>
 
-  Debug output:
-  <textarea id="output" rows="20"></textarea>
-
-  <br>
-
-  <b>Troubleshooting</b>
-
-  <br><br>
-
-  The page does some heavy computations, so make sure:
-
-  <ul>
-    <li>To use a modern web browser (e.g. Chrome, Firefox)</li>
-    <li>To use a fast desktop or laptop computer (i.e. not a mobile phone)</li>
-    <li>Your browser supports WASM <a href="https://webassembly.org/roadmap/">Fixed-width SIMD</a></li>
-  </ul>
-
-  <div class="cell-version">
-                <span>
-                    |
-                    Build time: <span class="nav-link">Fri Sep 19 03:33:53 2025</span> |
-                    Commit hash: <a class="nav-link" href="https://github.com/ggerganov/whisper.cpp/commit/44fa2f64">44fa2f64</a> |
-                    Commit subject: <span class="nav-link">ggml : Fix MKL detection by quoting BLAS_INCLUDE_DIRS (#3426)</span> |
-                    <a class="nav-link" href="https://github.com/ggerganov/whisper.cpp/tree/master/examples/stream.wasm">Source Code</a> |
-                </span>
+  <div class="status-container">
+    <p>🔥 상태: <span id="status">대기 중</span></p>
   </div>
 </div>
 
-<script type="text/javascript" src="helpers.js"></script>
-<script type='text/javascript'>
-  // web audio context
-  var context = null;
-
-  // audio data
-  var audio = null;
-  var audio0 = null;
-
-  // the stream instance
-  var instance = null;
-
-  // model name
-  var model_whisper = null;
-
+<script>
+  // whisper.cpp WASM 모듈 전역 설정
   var Module = {
-    print: printTextarea,
-    printErr: printTextarea,
-    setStatus: function(text) {
-      printTextarea('js: ' + text);
+    onRuntimeInitialized: function() {
+      console.log('Whisper WASM 모듈이 성공적으로 초기화되었습니다.');
+      Module.ready = true;
+
+      // 상태 업데이트
+      if (typeof statusElement !== 'undefined') {
+        statusElement.textContent = 'WASM 모듈 준비 완료. 모델을 선택하고 다운로드하세요.';
+      }
     },
+
+    print: function(text) {
+      console.log('WASM 출력:', text);
+    },
+
+    printErr: function(text) {
+      console.error('WASM 오류:', text);
+    },
+
+    // 파일 시스템 설정
+    preRun: [],
+    postRun: [],
+
+    // 메모리 설정 (whisper.cpp는 많은 메모리가 필요)
+    INITIAL_MEMORY: 64 * 1024 * 1024, // 64MB
+
+    // 오류 처리
+    onAbort: function(what) {
+      console.error('WASM 모듈이 중단되었습니다:', what);
+      if (typeof statusElement !== 'undefined') {
+        statusElement.textContent = 'WASM 모듈 오류가 발생했습니다.';
+      }
+    },
+
+    // 진행률 표시
     monitorRunDependencies: function(left) {
-    },
-    preRun: function() {
-      printTextarea('js: Preparing ...');
-    },
-    postRun: function() {
-      printTextarea('js: Initialized successfully!');
+      if (left === 0) {
+        console.log('모든 WASM 종속성이 로드되었습니다.');
+      } else {
+        console.log('WASM 종속성 로드 중:', left, '개 남음');
+      }
     }
   };
 
-  //
-  // fetch models
-  //
-
-  let dbVersion = 1
-  let dbName    = 'whisper.ggerganov.com';
-  let indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
-
-  function storeFS(fname, buf) {
-    // write to WASM file using FS_createDataFile
-    // if the file exists, delete it
-    try {
-      Module.FS_unlink(fname);
-    } catch (e) {
-      // ignore
+  // 브라우저 호환성 체크
+  function checkBrowserCompatibility() {
+    // WASM 지원 확인
+    if (typeof WebAssembly === 'undefined') {
+      alert('이 브라우저는 WebAssembly를 지원하지 않습니다. Chrome, Firefox, Safari의 최신 버전을 사용하세요.');
+      return false;
     }
 
-    Module.FS_createDataFile("/", fname, buf, true, true);
-
-    printTextarea('storeFS: stored model: ' + fname + ' size: ' + buf.length);
-
-    document.getElementById('model-whisper-status').innerHTML = 'loaded "' + model_whisper + '"!';
-
-    if (model_whisper != null) {
-      document.getElementById('start').disabled = false;
-      document.getElementById('stop' ).disabled = true;
-    }
-  }
-
-  function loadWhisper(model) {
-    let urls = {
-      'tiny.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin',
-      'base.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin',
-      'base'   : 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin',
-
-      'tiny-en-q5_1':  'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin',
-      'base-en-q5_1':  'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin',
-    };
-
-    let sizes = {
-      'tiny.en': 75,
-      'base.en': 142,
-      'base':     142,
-
-      'tiny-en-q5_1':   31,
-      'base-en-q5_1':   57,
-    };
-
-    let url     = urls[model];
-    let dst     = 'whisper.bin';
-    let size_mb = sizes[model];
-
-    model_whisper = model;
-
-    document.getElementById('fetch-whisper-tiny-en').style.display = 'none';
-    document.getElementById('fetch-whisper-base-en').style.display = 'none';
-    document.getElementById('fetch-whisper-base').style.display = 'none';
-
-    document.getElementById('fetch-whisper-tiny-en-q5_1').style.display = 'none';
-    document.getElementById('fetch-whisper-base-en-q5_1').style.display = 'none';
-
-    document.getElementById('model-whisper-status').innerHTML = 'loading "' + model + '" ... ';
-
-    cbProgress = function(p) {
-      let el = document.getElementById('fetch-whisper-progress');
-      el.innerHTML = Math.round(100*p) + '%';
-    };
-
-    cbCancel = function() {
-      var el;
-      el = document.getElementById('fetch-whisper-tiny-en'); if (el) el.style.display = 'inline-block';
-      el = document.getElementById('fetch-whisper-base-en'); if (el) el.style.display = 'inline-block';
-      el = document.getElementById('fetch-whisper-base'); if (el) el.style.display = 'inline-block';
-
-      el = document.getElementById('fetch-whisper-tiny-en-q5_1'); if (el) el.style.display = 'inline-block';
-      el = document.getElementById('fetch-whisper-base-en-q5_1'); if (el) el.style.display = 'inline-block';
-
-      el = document.getElementById('model-whisper-status');  if (el) el.innerHTML = '';
-    };
-
-    loadRemote(url, dst, size_mb, cbProgress, storeFS, cbCancel, printTextarea);
-  }
-
-  //
-  // microphone
-  //
-
-  const kSampleRate = 16000;
-  const kRestartRecording_s = 120;
-  const kIntervalAudio_ms = 5000; // pass the recorded audio to the C++ instance at this rate
-
-  var mediaRecorder = null;
-  var doRecording = false;
-  var startTime = 0;
-
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-
-  function stopRecording() {
-    Module.set_status("paused");
-    doRecording = false;
-    audio0 = null;
-    audio = null;
-    context = null;
-  }
-
-  function startRecording() {
-    if (!context) {
-      context = new AudioContext({
-        sampleRate: kSampleRate,
-        channelCount: 1,
-        echoCancellation: false,
-        autoGainControl:  true,
-        noiseSuppression: true,
-      });
+    // WASM SIMD 지원 확인 (whisper.cpp 필수)
+    if (typeof WebAssembly.instantiate !== 'function') {
+      console.warn('WASM SIMD가 지원되지 않을 수 있습니다.');
     }
 
-    Module.set_status("");
-
-    document.getElementById('start').disabled = true;
-    document.getElementById('stop').disabled = false;
-
-    doRecording = true;
-    startTime = Date.now();
-
-    var chunks = [];
-    var stream = null;
-
-    navigator.mediaDevices.getUserMedia({audio: true, video: false})
-    .then(function(s) {
-      stream = s;
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = function(e) {
-        chunks.push(e.data);
-
-        var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-        var reader = new FileReader();
-
-        reader.onload = function(event) {
-          var buf = new Uint8Array(reader.result);
-
-          if (!context) {
-            return;
-          }
-          context.decodeAudioData(buf.buffer, function(audioBuffer) {
-            var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
-            var source = offlineContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(offlineContext.destination);
-            source.start(0);
-
-            offlineContext.startRendering().then(function(renderedBuffer) {
-              audio = renderedBuffer.getChannelData(0);
-
-              //printTextarea('js: audio recorded, size: ' + audio.length + ', old size: ' + (audio0 == null ? 0 : audio0.length));
-
-              var audioAll = new Float32Array(audio0 == null ? audio.length : audio0.length + audio.length);
-              if (audio0 != null) {
-                audioAll.set(audio0, 0);
-              }
-              audioAll.set(audio, audio0 == null ? 0 : audio0.length);
-
-              if (instance) {
-                Module.set_audio(instance, audioAll);
-              }
-            });
-          }, function(e) {
-            audio = null;
-          });
-        }
-
-        reader.readAsArrayBuffer(blob);
-      };
-
-      mediaRecorder.onstop = function(e) {
-        if (doRecording) {
-          setTimeout(function() {
-            startRecording();
-          });
-        }
-      };
-
-      mediaRecorder.start(kIntervalAudio_ms);
-    })
-    .catch(function(err) {
-      printTextarea('js: error getting audio stream: ' + err);
-    });
-
-    var interval = setInterval(function() {
-      if (!doRecording) {
-        clearInterval(interval);
-        mediaRecorder.stop();
-        stream.getTracks().forEach(function(track) {
-          track.stop();
-        });
-
-        document.getElementById('start').disabled = false;
-        document.getElementById('stop').disabled  = true;
-
-        mediaRecorder = null;
-      }
-
-      // if audio length is more than kRestartRecording_s seconds, restart recording
-      if (audio != null && audio.length > kSampleRate*kRestartRecording_s) {
-        if (doRecording) {
-          //printTextarea('js: restarting recording');
-
-          clearInterval(interval);
-          audio0 = audio;
-          audio = null;
-          mediaRecorder.stop();
-          stream.getTracks().forEach(function(track) {
-            track.stop();
-          });
-        }
-      }
-    }, 100);
+    return true;
   }
 
-  //
-  // main
-  //
-
-  var nLines = 0;
-  var intervalUpdate = null;
-  var transcribedAll = '';
-
-  function onStart() {
-    if (!instance) {
-      instance = Module.init('whisper.bin', document.getElementById('language').value);
-
-      if (instance) {
-        printTextarea("js: whisper initialized, instance: " + instance);
-      }
+  // 페이지 로드 시 호환성 검사
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!checkBrowserCompatibility()) {
+      document.body.innerHTML = '<h1>브라우저 호환성 오류</h1><p>WebAssembly를 지원하는 브라우저가 필요합니다.</p>';
     }
-
-    if (!instance) {
-      printTextarea("js: failed to initialize whisper");
-      return;
-    }
-
-    startRecording();
-
-    intervalUpdate = setInterval(function() {
-      var transcribed = Module.get_transcribed();
-
-      if (transcribed != null && transcribed.length > 1) {
-        transcribedAll += transcribed + '<br>';
-        nLines++;
-
-        // if more than 10 lines, remove the first line
-        if (nLines > 10) {
-          var i = transcribedAll.indexOf('<br>');
-          if (i > 0) {
-            transcribedAll = transcribedAll.substring(i + 4);
-            nLines--;
-          }
-        }
-      }
-
-      document.getElementById('state-status').innerHTML = Module.get_status();
-      document.getElementById('state-transcribed').innerHTML = transcribedAll;
-    }, 100);
-  }
-
-  function onStop() {
-    stopRecording();
-  }
-
+  });
 </script>
-<script type="text/javascript" src="stream.js"></script>
+
+<script src="downloader.js"></script>
 </body>
 </html>
