@@ -1,191 +1,126 @@
-// Common Javascript functions used by the examples
-
-function convertTypedArray(src, type) {
-    var buffer = new ArrayBuffer(src.byteLength);
-    var baseView = new src.constructor(buffer).set(src);
-    return new type(buffer);
+/**
+ * Prints text to the debug output textarea.
+ * @param {string} text The text to print.
+ */
+function printTextarea(text) {
+  const output = document.getElementById('output');
+  if (output) {
+    output.value += text + '\n';
+    output.scrollTop = output.scrollHeight; // Scroll to bottom
+  }
+  console.log(text);
 }
 
-var printTextarea = (function() {
-    var element = document.getElementById('output');
-    if (element) element.value = ''; // clear browser cache
-    return function(text) {
-        if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-        console.log(text);
-        if (element) {
-            element.value += text + "\n";
-            element.scrollTop = element.scrollHeight; // focus on bottom
-        }
-    };
-})();
+/**
+ * Loads a remote file, reports progress, and caches it in IndexedDB.
+ * @param {string} url - The URL of the file to fetch.
+ * @param {string} dst - The destination filename for in-memory FS.
+ * @param {number} size_mb - The expected size in MB for logging.
+ * @param {function(number)} cbProgress - Callback for download progress (0.0 to 1.0).
+ * @param {function(string, Uint8Array)} cbReady - Callback when the file is ready.
+ * @param {function()} cbCancel - Callback if the download is canceled or fails.
+ * @param {function(string)} print - Function to log messages.
+ */
+async function loadRemote(url, dst, size_mb, cbProgress, cbReady, cbCancel, print) {
+  print(`js: loading remote '${url}' to '${dst}' (${size_mb} MB)`);
 
-async function clearCache() {
-    if (confirm('Are you sure you want to clear the cache?\nAll the models will be downloaded again.')) {
-        indexedDB.deleteDatabase(dbName);
-        location.reload();
+  const dbName = 'whisper.ggerganov.com';
+  const dbVersion = 1;
+
+  // --- IndexedDB Helper ---
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, dbVersion);
+      request.onupgradeneeded = event => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains('files')) {
+          db.createObjectStore('files');
+        }
+      };
+      request.onsuccess = event => resolve(event.target.result);
+      request.onerror = event => reject(event.target.error);
+    });
+  }
+
+  async function getFileFromDB(db, key) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['files'], 'readonly');
+      const store = transaction.objectStore('files');
+      const request = store.get(key);
+      request.onsuccess = event => resolve(event.target.result);
+      request.onerror = event => reject(event.target.error);
+    });
+  }
+
+  async function saveFileToDB(db, key, value) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['files'], 'readwrite');
+      const store = transaction.objectStore('files');
+      const request = store.put(value, key);
+      request.onsuccess = event => resolve(event.target.result);
+      request.onerror = event => reject(event.target.error);
+    });
+  }
+
+  // --- Main Logic ---
+  try {
+    const db = await openDB();
+    const cachedData = await getFileFromDB(db, url);
+    if (cachedData) {
+      print("js: found model in IndexedDB, loading...");
+      cbReady(dst, new Uint8Array(cachedData));
+      return;
     }
-}
+    print("js: model not found in IndexedDB, downloading...");
+  } catch (err) {
+    print(`js: IndexedDB error: ${err}. Continuing with download.`);
+  }
 
-// fetch a remote file from remote URL using the Fetch API
-async function fetchRemote(url, cbProgress, cbPrint) {
-    cbPrint('fetchRemote: downloading with fetch()...');
-
-    const response = await fetch(
-        url,
-        {
-            method: 'GET',
-        }
-    );
-
+  try {
+    const response = await fetch(url, { mode: 'cors' });
     if (!response.ok) {
-        cbPrint('fetchRemote: failed to fetch ' + url);
-        return;
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    if (!response.body) {
+      throw new Error("Response body is null");
     }
 
-    const contentLength = response.headers.get('content-length');
-    const total = parseInt(contentLength, 10);
     const reader = response.body.getReader();
-
-    var chunks = [];
-    var receivedLength = 0;
-    var progressLast = -1;
+    const contentLength = +response.headers.get('Content-Length');
+    let receivedLength = 0;
+    const chunks = [];
 
     while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-            break;
-        }
-
-        chunks.push(value);
-        receivedLength += value.length;
-
-        if (contentLength) {
-            cbProgress(receivedLength/total);
-
-            var progressCur = Math.round((receivedLength / total) * 10);
-            if (progressCur != progressLast) {
-                cbPrint('fetchRemote: fetching ' + 10*progressCur + '% ...');
-                progressLast = progressCur;
-            }
-        }
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      receivedLength += value.length;
+      if (contentLength) {
+        cbProgress(receivedLength / contentLength);
+      }
     }
 
-    var position = 0;
-    var chunksAll = new Uint8Array(receivedLength);
-
-    for (var chunk of chunks) {
-        chunksAll.set(chunk, position);
-        position += chunk.length;
+    const chunksAll = new Uint8Array(receivedLength);
+    let position = 0;
+    for (const chunk of chunks) {
+      chunksAll.set(chunk, position);
+      position += chunk.length;
     }
 
-    return chunksAll;
-}
+    cbReady(dst, chunksAll);
 
-// load remote data
-// - check if the data is already in the IndexedDB
-// - if not, fetch it from the remote URL and store it in the IndexedDB
-function loadRemote(url, dst, size_mb, cbProgress, cbReady, cbCancel, cbPrint) {
-    if (!navigator.storage || !navigator.storage.estimate) {
-        cbPrint('loadRemote: navigator.storage.estimate() is not supported');
-    } else {
-        // query the storage quota and print it
-        navigator.storage.estimate().then(function (estimate) {
-            cbPrint('loadRemote: storage quota: ' + estimate.quota + ' bytes');
-            cbPrint('loadRemote: storage usage: ' + estimate.usage + ' bytes');
-        });
+    try {
+      const db = await openDB();
+      await saveFileToDB(db, url, chunksAll.buffer);
+      print("js: model saved to IndexedDB for future use.");
+    } catch (err) {
+      print(`js: Failed to save model to IndexedDB: ${err}`);
     }
 
-    // check if the data is already in the IndexedDB
-    var rq = indexedDB.open(dbName, dbVersion);
-
-    rq.onupgradeneeded = function (event) {
-        var db = event.target.result;
-        if (db.version == 1) {
-            var os = db.createObjectStore('models', { autoIncrement: false });
-            cbPrint('loadRemote: created IndexedDB ' + db.name + ' version ' + db.version);
-        } else {
-            // clear the database
-            var os = event.currentTarget.transaction.objectStore('models');
-            os.clear();
-            cbPrint('loadRemote: cleared IndexedDB ' + db.name + ' version ' + db.version);
-        }
-    };
-
-    rq.onsuccess = function (event) {
-        var db = event.target.result;
-        var tx = db.transaction(['models'], 'readonly');
-        var os = tx.objectStore('models');
-        var rq = os.get(url);
-
-        rq.onsuccess = function (event) {
-            if (rq.result) {
-                cbPrint('loadRemote: "' + url + '" is already in the IndexedDB');
-                cbReady(dst, rq.result);
-            } else {
-                // data is not in the IndexedDB
-                cbPrint('loadRemote: "' + url + '" is not in the IndexedDB');
-
-                // alert and ask the user to confirm
-                if (!confirm(
-                    'You are about to download ' + size_mb + ' MB of data.\n' +
-                    'The model data will be cached in the browser for future use.\n\n' +
-                    'Press OK to continue.')) {
-                    cbCancel();
-                    return;
-                }
-
-                fetchRemote(url, cbProgress, cbPrint).then(function (data) {
-                    if (data) {
-                        // store the data in the IndexedDB
-                        var rq = indexedDB.open(dbName, dbVersion);
-                        rq.onsuccess = function (event) {
-                            var db = event.target.result;
-                            var tx = db.transaction(['models'], 'readwrite');
-                            var os = tx.objectStore('models');
-
-                            var rq = null;
-                            try {
-                                var rq = os.put(data, url);
-                            } catch (e) {
-                                cbPrint('loadRemote: failed to store "' + url + '" in the IndexedDB: \n' + e);
-                                cbCancel();
-                                return;
-                            }
-
-                            rq.onsuccess = function (event) {
-                                cbPrint('loadRemote: "' + url + '" stored in the IndexedDB');
-                                cbReady(dst, data);
-                            };
-
-                            rq.onerror = function (event) {
-                                cbPrint('loadRemote: failed to store "' + url + '" in the IndexedDB');
-                                cbCancel();
-                            };
-                        };
-                    }
-                });
-            }
-        };
-
-        rq.onerror = function (event) {
-            cbPrint('loadRemote: failed to get data from the IndexedDB');
-            cbCancel();
-        };
-    };
-
-    rq.onerror = function (event) {
-        cbPrint('loadRemote: failed to open IndexedDB');
-        cbCancel();
-    };
-
-    rq.onblocked = function (event) {
-        cbPrint('loadRemote: failed to open IndexedDB: blocked');
-        cbCancel();
-    };
-
-    rq.onabort = function (event) {
-        cbPrint('loadRemote: failed to open IndexedDB: abort');
-        cbCancel();
-    };
+  } catch (err) {
+    print(`js: error loading remote '${url}': ${err}`);
+    if (cbCancel) {
+      cbCancel();
+    }
+  }
 }
