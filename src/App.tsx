@@ -1,5 +1,6 @@
 import LaneTimer from './components/LaneTimer';
 import VoiceControl from './components/VoiceControl/VoiceControl';
+import { WasmTest } from './components/WasmTest';
 
 import topIcon from './assets/icon_top.png';
 import jungleIcon from './assets/icon_jungle.png';
@@ -42,6 +43,8 @@ function App() {
 
             <main className=" flex-grow flex flex-col items-center">
               <VoiceControl />
+              {/* Development only: WASM test component */}
+              {import.meta.env.DEV && <WasmTest />}
               <div className=" space-y-4">
                 {lanes.map((lane) => (
                     <LaneTimer key={lane.name} lane={lane.name} icon={lane.icon} />

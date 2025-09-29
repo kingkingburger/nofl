@@ -91,9 +91,9 @@ export async function embedWasmFile(
     }
 
     try {
-        // Dynamic import for Node.js modules
-        const fs = await import('fs');
-        const path = await import('path');
+        // This function is designed for Node.js scripts, not for browser builds
+        // It should only be called from separate Node.js scripts
+        const fs = eval('require("fs")');
 
         // Read WASM file
         const wasmBuffer = fs.readFileSync(wasmFilePath);

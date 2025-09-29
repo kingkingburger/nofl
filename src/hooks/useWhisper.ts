@@ -36,9 +36,10 @@ export const useWhisper = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    const whisperWorker = new Worker('/whisper/whisper.worker.js', {
-      type: 'module'
-    });
+    const whisperWorker = new Worker(
+      new URL('../workers/whisperWorker.ts', import.meta.url),
+      { type: 'module' }
+    );
     console.log('Whisper Worker가 생성되었습니다.');
 
     whisperWorker.onmessage = (event: MessageEvent<WhisperEventData | any>) => {
