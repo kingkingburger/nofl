@@ -1,155 +1,421 @@
-
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nofl - Flash Timer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <div id="main-container">
-      <h1>stream : Real-time Whisper transcription in WebAssembly</h1>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoFl - Flash Timer</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="/coi-serviceworker.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      <p>
-        You can find more about this project on <a href="https://github.com/ggerganov/whisper.cpp/tree/master/examples/stream.wasm">GitHub</a>.
-      </p>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0a0a0a;
+      background-image: radial-gradient(circle at center, #1a1a1a, #0a0a0a);
+      color: #f0f0f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
 
-      <p>
-        <b>More examples:</b>
-        <a href="../">main</a> |
-        <a href="../bench.wasm/">bench</a> |
-        <a href="../stream.wasm">stream</a> |
-        <a href="../command.wasm/">command</a>
-      </p>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-      <hr>
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #d4af37;
+      text-shadow: 0 1px 10px rgba(212, 175, 55, 0.3);
+      margin-bottom: 0.5rem;
+    }
 
-      <p>Select the model you would like to use, click the "Start" button and start speaking</p>
+    .subtitle {
+      text-align: center;
+      color: #a0a0a0;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Voice Control Section */
+    .voice-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    .voice-section h2 {
+      font-size: 1.25rem;
+      color: #d4af37;
+      margin-bottom: 1rem;
+    }
+
+    .voice-status {
+      font-size: 0.875rem;
+      color: #a0a0a0;
+      margin-bottom: 1rem;
+    }
+
+    .model-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .model-buttons button {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 0.5rem;
+      color: #d4af37;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .model-buttons button:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #d4af37;
+    }
+
+    .model-progress {
+      color: #d4af37;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .controls-container {
+      margin-bottom: 1rem;
+    }
+
+    .controls-container label {
+      color: #d4af37;
+      margin-right: 0.5rem;
+    }
+
+    .controls-container select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 0.5rem;
+      color: #f0f0f0;
+      padding: 0.5rem;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .voice-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .voice-buttons button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-start {
+      background: #d4af37;
+      color: #0d0d0d;
+    }
+
+    .btn-start:hover:not(:disabled) {
+      background: #e5c158;
+    }
+
+    .btn-start:disabled {
+      background: #4a4a4a;
+      color: #808080;
+      cursor: not-allowed;
+    }
+
+    .btn-stop {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-stop:hover:not(:disabled) {
+      background: #c0392b;
+    }
+
+    .btn-stop:disabled {
+      background: #4a4a4a;
+      color: #808080;
+      cursor: not-allowed;
+    }
+
+    .btn-clear {
+      background: #555;
+      color: white;
+    }
+
+    .btn-clear:hover {
+      background: #666;
+    }
+
+    .transcript {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 0.5rem;
+      min-height: 5rem;
+      color: #f0f0f0;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+    }
+
+    /* Lane Timers Section */
+    .timers-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    .timers-section h2 {
+      font-size: 1.25rem;
+      color: #d4af37;
+      margin-bottom: 1rem;
+    }
+
+    .lane-timers {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .lane-timer {
+      position: relative;
+      height: 5rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease-in-out;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .lane-timer:hover {
+      transform: scale(1.02);
+    }
+
+    .lane-timer.active {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .lane-timer .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: rgba(212, 175, 55, 0.2);
+      transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      width: 0%;
+    }
+
+    .lane-icon {
+      flex-shrink: 0;
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .lane-icon img {
+      width: 2.5rem;
+      height: 2.5rem;
+      filter: grayscale(100%);
+      opacity: 0.6;
+      transition: all 0.5s;
+    }
+
+    .lane-timer.active .lane-icon img {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .lane-info {
+      margin-left: 1rem;
+      flex-grow: 1;
+      z-index: 10;
+    }
+
+    .lane-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: rgba(160, 160, 160, 0.8);
+      transition: color 0.3s;
+    }
+
+    .lane-timer.active .lane-name {
+      color: white;
+    }
+
+    .lane-time {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s;
+    }
+
+    .lane-timer.active .lane-time {
+      color: #d4af37;
+    }
+
+    #output {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>NoFl</h1>
+  <p class="subtitle">음성 인식으로 플래시 타이머를 시작하세요 (예: "탑 노플")</p>
+
+  <div class="two-column">
+    <!-- Voice Control Section -->
+    <div class="voice-section">
+      <h2>🎤 음성 인식</h2>
 
       <div id="model-whisper">
-        <p>Whisper model: <span id="model-whisper-status"></span></p>
+        <p class="voice-status">Whisper 모델: <span id="model-whisper-status">선택하세요</span></p>
         <div class="model-buttons">
           <button id="fetch-whisper-tiny-en">tiny.en (75 MB)</button>
           <button id="fetch-whisper-base-en">base.en (142 MB)</button>
           <button id="fetch-whisper-base">base (142 MB)</button>
-          <p>Quantized models:</p>
-          <button id="fetch-whisper-tiny-en-q5_1">tiny.en (Q5_1, 31 MB)</button>
-          <button id="fetch-whisper-base-en-q5_1">base.en (Q5_1, 57 MB)</button>
-          <span id="fetch-whisper-progress"></span>
+          <button id="fetch-whisper-tiny-en-q5_1">tiny-en-q5_1 (31 MB)</button>
+          <button id="fetch-whisper-base-en-q5_1">base-en-q5_1 (57 MB)</button>
         </div>
+        <p class="voice-status">
+          <span id="fetch-whisper-progress" class="model-progress"></span>
+        </p>
       </div>
 
       <div class="controls-container">
-        <label for="language">Language:</label>
+        <label for="language">언어:</label>
         <select id="language" name="language">
-          <option value="en">English</option>
-          <option value="ar">Arabic</option>
-          <option value="hy">Armenian</option>
-          <option value="az">Azerbaijani</option>
-          <option value="eu">Basque</option>
-          <option value="be">Belarusian</option>
-          <option value="bn">Bengali</option>
-          <option value="bg">Bulgarian</option>
-          <option value="ca">Catalan</option>
-          <option value="zh">Chinese</option>
-          <option value="hr">Croatian</option>
-          <option value="cs">Czech</option>
-          <option value="da">Danish</option>
-          <option value="nl">Dutch</option>
-          <option value="et">Estonian</option>
-          <option value="tl">Filipino</option>
-          <option value="fi">Finnish</option>
-          <option value="fr">French</option>
-          <option value="gl">Galician</option>
-          <option value="ka">Georgian</option>
-          <option value="de">German</option>
-          <option value="el">Greek</option>
-          <option value="gu">Gujarati</option>
-          <option value="iw">Hebrew</option>
-          <option value="hi">Hindi</option>
-          <option value="hu">Hungarian</option>
-          <option value="is">Icelandic</option>
-          <option value="id">Indonesian</option>
-          <option value="ga">Irish</option>
-          <option value="it">Italian</option>
-          <option value="ja">Japanese</option>
-          <option value="kn">Kannada</option>
           <option value="ko">Korean</option>
-          <option value="la">Latin</option>
-          <option value="lv">Latvian</option>
-          <option value="lt">Lithuanian</option>
-          <option value="mk">Macedonian</option>
-          <option value="ms">Malay</option>
-          <option value="mt">Maltese</option>
-          <option value="no">Norwegian</option>
-          <option value="fa">Persian</option>
-          <option value="pl">Polish</option>
-          <option value="pt">Portuguese</option>
-          <option value="ro">Romanian</option>
-          <option value="ru">Russian</option>
-          <option value="sr">Serbian</option>
-          <option value="sk">Slovak</option>
-          <option value="sl">Slovenian</option>
-          <option value="es">Spanish</option>
-          <option value="sw">Swahili</option>
-          <option value="sv">Swedish</option>
-          <option value="ta">Tamil</option>
-          <option value="te">Telugu</option>
-          <option value="th">Thai</option>
-          <option value="tr">Turkish</option>
-          <option value="uk">Ukrainian</option>
-          <option value="ur">Urdu</option>
-          <option value="vi">Vietnamese</option>
-          <option value="cy">Welsh</option>
-          <option value="yi">Yiddish</option>
+          <option value="en">English</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
         </select>
       </div>
 
-      <div id="input">
-        <button id="start" disabled>Start</button>
-        <button id="stop" disabled>Stop</button>
-        <button id="clear">Clear Cache</button>
+      <div class="voice-buttons">
+        <button id="start" class="btn-start" disabled>녹음 시작</button>
+        <button id="stop" class="btn-stop" disabled>녹음 중지</button>
+        <button id="clear" class="btn-clear">캐시 지우기</button>
       </div>
 
       <div id="state">
-        Status: <b><span id="state-status">not started</span></b>
-        <pre id="state-transcribed">[The transcribed text will be displayed here]</pre>
-      </div>
-
-      <hr>
-
-      <h3>Debug output:</h3>
-      <textarea id="output" rows="20" readonly></textarea>
-
-      <div class="troubleshooting">
-        <h3>Troubleshooting</h3>
-        <p>The page does some heavy computations, so make sure:</p>
-        <ul>
-          <li>To use a modern web browser (e.g. Chrome, Firefox)</li>
-          <li>To use a fast desktop or laptop computer (i.e. not a mobile phone)</li>
-          <li>Your browser supports WASM <a href="https://webassembly.org/roadmap/">Fixed-width SIMD</a></li>
-        </ul>
-      </div>
-
-      <div class="cell-version">
-      <span>
-          |
-          Build time: <span class="nav-link">Fri Sep 19 12:33:53 2025</span> |
-          Commit hash: <a class="nav-link" href="https://github.com/ggerganov/whisper.cpp/commit/44fa2f64">44fa2f64</a> |
-          Commit subject: <span class="nav-link">ggml : Fix MKL detection by quoting BLAS_INCLUDE_DIRS (#3426)</span> |
-          <a class="nav-link" href="https://github.com/ggerganov/whisper.cpp/tree/master/examples/stream.wasm">Source Code</a> |
-      </span>
+        <p class="voice-status">상태: <b><span id="state-status">준비 안됨</span></b></p>
+        <div class="transcript" id="state-transcribed">[음성 인식 결과가 여기에 표시됩니다]</div>
       </div>
     </div>
 
-    <script type="module" src="/src/main.tsx"></script>
-    <script type="text/javascript" src="/public/example/helpers.js"></script>
-    <script type="text/javascript" src="/public/example/main.js"></script>
-    <script type="text/javascript" src="/public/example/stream.js"></script>
-  </body>
+    <!-- Lane Timers Section -->
+    <div class="timers-section">
+      <h2>⏱️ 플래시 타이머</h2>
+      <div class="lane-timers">
+        <div class="lane-timer" data-lane="TOP">
+          <div class="progress-bar"></div>
+          <div class="lane-icon">
+            <img src="/src/assets/icon_top.png" alt="TOP">
+          </div>
+          <div class="lane-info">
+            <div class="lane-name">TOP</div>
+            <div class="lane-time">READY</div>
+          </div>
+        </div>
+
+        <div class="lane-timer" data-lane="JGL">
+          <div class="progress-bar"></div>
+          <div class="lane-icon">
+            <img src="/src/assets/icon_jungle.png" alt="JGL">
+          </div>
+          <div class="lane-info">
+            <div class="lane-name">JGL</div>
+            <div class="lane-time">READY</div>
+          </div>
+        </div>
+
+        <div class="lane-timer" data-lane="MID">
+          <div class="progress-bar"></div>
+          <div class="lane-icon">
+            <img src="/src/assets/icon_mid.png" alt="MID">
+          </div>
+          <div class="lane-info">
+            <div class="lane-name">MID</div>
+            <div class="lane-time">READY</div>
+          </div>
+        </div>
+
+        <div class="lane-timer" data-lane="BOT">
+          <div class="progress-bar"></div>
+          <div class="lane-icon">
+            <img src="/src/assets/icon_bot.png" alt="BOT">
+          </div>
+          <div class="lane-info">
+            <div class="lane-name">BOT</div>
+            <div class="lane-time">READY</div>
+          </div>
+        </div>
+
+        <div class="lane-timer" data-lane="SUP">
+          <div class="progress-bar"></div>
+          <div class="lane-icon">
+            <img src="/src/assets/icon_sup.png" alt="SUP">
+          </div>
+          <div class="lane-info">
+            <div class="lane-name">SUP</div>
+            <div class="lane-time">READY</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<textarea id="output" rows="20" readonly style="display:none;"></textarea>
+
+<script type="text/javascript" src="/example/helpers.js"></script>
+<script type="text/javascript" src="/example/main.js"></script>
+<script type="text/javascript" src="/example/stream.js"></script>
+<script type="text/javascript" src="/nofl-app.js"></script>
+</body>
 </html>
