@@ -102,7 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     model_whisper = model;
-    Object.values(modelButtons).forEach(btn => btn.style.display = 'none');
+    Object.values(modelButtons).forEach(btn => {
+      if (btn) btn.style.display = 'none';
+    });
     modelStatus.innerHTML = `loading "${model}" ... `;
     modelProgress.innerHTML = '';
 
@@ -110,7 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
       modelProgress.innerHTML = Math.round(100 * p) + '%';
     };
     const cbCancel = () => {
-      Object.values(modelButtons).forEach(btn => btn.style.display = 'inline-block');
+      Object.values(modelButtons).forEach(btn => {
+        if (btn) btn.style.display = 'inline-block';
+      });
       modelStatus.innerHTML = '';
       modelProgress.innerHTML = '';
     };
@@ -284,6 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
   stopButton.addEventListener('click', onStop);
   clearButton.addEventListener('click', clearCache);
   Object.keys(modelButtons).forEach(modelName => {
-    modelButtons[modelName].addEventListener('click', () => loadWhisper(modelName));
+    const button = modelButtons[modelName];
+    if (button) {
+      button.addEventListener('click', () => loadWhisper(modelName));
+    }
   });
 });
