@@ -141,21 +141,8 @@ pnpm test
 
 MIT License
 
-## 🙏 크레딧
+## 🙏 사용한 라이브러리
 
 - [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) - 음성 인식 엔진
-- [Hugging Face](https://huggingface.co/) - Whisper 모델 호스팅
 
-## 🤝 기여하기
 
-이슈와 풀 리퀘스트는 언제나 환영합니다!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-**Made with ❤️ for LoL Players**
