@@ -68,8 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     'tiny.en': document.getElementById('fetch-whisper-tiny-en'),
     'base.en': document.getElementById('fetch-whisper-base-en'),
     'base': document.getElementById('fetch-whisper-base'),
-    'small': document.getElementById('fetch-whisper-small'),
-    'medium': document.getElementById('fetch-whisper-medium'),
     'tiny-en-q5_1': document.getElementById('fetch-whisper-tiny-en-q5_1'),
     'base-en-q5_1': document.getElementById('fetch-whisper-base-en-q5_1'),
   };
@@ -96,8 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
       'tiny.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin',
       'base.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin',
       'base': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin',
-      'small': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin',
-      'medium': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin',
       'tiny-en-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin',
       'base-en-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin',
     };

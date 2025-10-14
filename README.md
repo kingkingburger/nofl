@@ -103,8 +103,6 @@ pnpm test
 ## 📱 브라우저 호환성
 
 - ✅ Chrome/Edge (권장)
-- ✅ Firefox
-- ✅ Safari (macOS/iOS)
 - ⚠️ HTTPS 또는 localhost에서만 작동 (마이크 권한 필요)
 
 ## 🎨 모델 크기 선택 가이드
