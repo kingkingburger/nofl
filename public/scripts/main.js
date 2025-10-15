@@ -46,6 +46,13 @@ var Module = {
   },
   postRun: function() {
     printTextarea('js: Initialized successfully!');
+  },
+  locateFile: function(path, scriptDirectory) {
+    // libstream.wasm should be loaded from the scripts directory
+    if (path === 'libstream.wasm') {
+      return '/scripts/libstream.wasm';
+    }
+    return scriptDirectory + path;
   }
 };
 
