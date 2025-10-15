@@ -35,6 +35,14 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Verify build output
+        run: |
+          echo "=== Checking dist/index.html paths ==="
+          grep -E "(href=|src=)" dist/index.html | head -10
+          echo "=== Checking dist directory structure ==="
+          ls -la dist/
+          ls -la dist/scripts/ || echo "scripts directory not found"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
