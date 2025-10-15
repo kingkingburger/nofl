@@ -49,8 +49,10 @@ var Module = {
   },
   locateFile: function(path, scriptDirectory) {
     // libstream.wasm should be loaded from the scripts directory
+    // Use relative path or let Vite handle the base path
     if (path === 'libstream.wasm') {
-      return '/scripts/libstream.wasm';
+      // scriptDirectory already includes the base path from Vite
+      return scriptDirectory + 'libstream.wasm';
     }
     return scriptDirectory + path;
   }
