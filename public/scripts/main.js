@@ -35,18 +35,6 @@ const dbName = 'whisper.ggerganov.com';
 // This global `Module` object is required by the Emscripten-generated `stream.js`.
 // We configure it before `stream.js` is loaded.
 var Module = {
-  print: printTextarea,
-  printErr: printTextarea,
-  setStatus: function(text) {
-    printTextarea('js: ' + text);
-  },
-  monitorRunDependencies: function(left) {},
-  preRun: function() {
-    printTextarea('js: Preparing ...');
-  },
-  postRun: function() {
-    printTextarea('js: Initialized successfully!');
-  },
   locateFile: function(path, scriptDirectory) {
     // libstream.wasm should be loaded from the scripts directory
     // Use relative path or let Vite handle the base path
@@ -229,7 +217,22 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       checkAndRestartRecording();
     })
-    .catch(err => printTextarea(`js: error getting audio stream: ${err}`));
+    .catch(err => {
+      printTextarea(`js: ❌ 마이크 접근 실패: ${err.name}`);
+      if (err.name === 'NotFoundError') {
+        printTextarea('js: 해결방법:');
+        printTextarea('js: 1. 마이크가 연결되어 있는지 확인하세요');
+        printTextarea('js: 2. 다른 앱에서 마이크를 사용 중인지 확인하세요');
+        printTextarea('js: 3. Windows 설정 > 개인정보 > 마이크에서 앱 권한을 확인하세요');
+      } else if (err.name === 'NotAllowedError') {
+        printTextarea('js: 브라우저에서 마이크 권한을 허용해주세요');
+      } else {
+        printTextarea(`js: 상세: ${err.message}`);
+      }
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      doRecording = false;
+    });
   }
 
 
