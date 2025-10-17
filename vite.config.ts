@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: '/nofl/',
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/nofl/' : '/',
   assetsInclude: ['*.wasm'],
   optimizeDeps: {
     exclude: ['*.wasm']
@@ -13,4 +13,4 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin'
     }
   },
-})
+}))

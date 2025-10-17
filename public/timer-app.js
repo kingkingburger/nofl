@@ -105,11 +105,11 @@ class TimerManager {
 
     // 음성 명령 매핑
     this.voiceCommands = [
-      { keywords: ['탑 노플', '탑노플', 'top nofl', 'top 노플'], lane: 'TOP' },
-      { keywords: ['정글 노플', '정글노플', 'jgl nofl', 'jungle nofl', '정글 노플'], lane: 'JGL' },
-      { keywords: ['미드 노플', '미드노플', 'mid nofl', '미드 노플'], lane: 'MID' },
-      { keywords: ['원딜 노플', '원딜노플', 'bot nofl', '봇 노플', '원딜 노플', '바텀 노플'], lane: 'BOT' },
-      { keywords: ['서폿 노플', '서폿노플', 'sup nofl', 'support nofl', '서포트 노플'], lane: 'SUP' },
+      { keywords: ['탑 노플', '탑노플', 'top nofl', 'top 노플', '탑 높을'], lane: 'TOP' },
+      { keywords: ['정글 노플', '정글노플', 'jgl nofl', 'jungle nofl', '정글 노플', '정글 높을'], lane: 'JGL' },
+      { keywords: ['미드 노플', '미드노플', 'mid nofl', '미드 노플', '미드 높을'], lane: 'MID' },
+      { keywords: ['원딜 노플', '원딜노플', 'bot nofl', '봇 노플', '원딜 노플', '바텀 노플', '바텀 높을'], lane: 'BOT' },
+      { keywords: ['서폿 노플', '서폿노플', 'sup nofl', 'support nofl', '서포트 노플', '서폿 높을'], lane: 'SUP' },
     ];
   }
 
