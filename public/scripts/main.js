@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusElement = document.getElementById('state-status');
   const transcribedElement = document.getElementById('state-transcribed');
 
+  // Error Modal Elements
+  const errorModal = document.getElementById('errorModal');
+  const errorTitle = document.getElementById('errorTitle');
+  const errorMessage = document.getElementById('errorMessage');
+  const errorSolutions = document.getElementById('errorSolutions');
+  const errorModalBtn = document.getElementById('errorModalBtn');
+  const modalClose = document.querySelector('.modal-close');
+
   const modelButtons = {
     'tiny.en': document.getElementById('fetch-whisper-tiny-en'),
     'base.en': document.getElementById('fetch-whisper-base-en'),
@@ -68,6 +76,34 @@ document.addEventListener('DOMContentLoaded', () => {
     'tiny-en-q5_1': document.getElementById('fetch-whisper-tiny-en-q5_1'),
     'base-en-q5_1': document.getElementById('fetch-whisper-base-en-q5_1'),
   };
+
+  // --- Modal Functions ---
+  function showErrorModal(title, message, solutions) {
+    errorTitle.textContent = title;
+    errorMessage.textContent = message;
+
+    if (solutions && solutions.length > 0) {
+      errorSolutions.style.display = 'block';
+      const ul = errorSolutions.querySelector('ul');
+      ul.innerHTML = solutions.map(sol => `<li>${sol}</li>`).join('');
+    } else {
+      errorSolutions.style.display = 'none';
+    }
+
+    errorModal.classList.add('show');
+  }
+
+  function closeErrorModal() {
+    errorModal.classList.remove('show');
+  }
+
+  errorModalBtn.addEventListener('click', closeErrorModal);
+  modalClose.addEventListener('click', closeErrorModal);
+  errorModal.addEventListener('click', (e) => {
+    if (e.target === errorModal) {
+      closeErrorModal();
+    }
+  });
 
   // --- Model Management ---
 
@@ -219,16 +255,44 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(err => {
       printTextarea(`js: ❌ 마이크 접근 실패: ${err.name}`);
+
+      let title = '마이크 접근 실패';
+      let message = '';
+      let solutions = [];
+
       if (err.name === 'NotFoundError') {
-        printTextarea('js: 해결방법:');
-        printTextarea('js: 1. 마이크가 연결되어 있는지 확인하세요');
-        printTextarea('js: 2. 다른 앱에서 마이크를 사용 중인지 확인하세요');
-        printTextarea('js: 3. Windows 설정 > 개인정보 > 마이크에서 앱 권한을 확인하세요');
+        message = '마이크를 찾을 수 없습니다.';
+        solutions = [
+          '마이크가 연결되어 있는지 확인하세요',
+          '다른 앱에서 마이크를 사용 중인지 확인하세요',
+          'Windows 설정 > 개인정보 > 마이크에서 앱 권한을 확인하세요',
+          '브라우저를 재시작해보세요'
+        ];
       } else if (err.name === 'NotAllowedError') {
-        printTextarea('js: 브라우저에서 마이크 권한을 허용해주세요');
+        message = '마이크 권한이 거부되었습니다.';
+        solutions = [
+          '브라우저 주소창의 자물쇠/정보 아이콘을 클릭하세요',
+          '마이크 권한을 "허용"으로 변경하세요',
+          '페이지를 새로고침한 후 다시 시도하세요'
+        ];
+      } else if (err.name === 'NotReadableError') {
+        message = '마이크에 접근할 수 없습니다.';
+        solutions = [
+          '다른 앱에서 마이크를 사용하고 있는지 확인하세요',
+          '마이크가 다른 프로그램에 의해 점유되어 있을 수 있습니다',
+          '컴퓨터를 재시작해보세요'
+        ];
       } else {
-        printTextarea(`js: 상세: ${err.message}`);
+        message = `오류가 발생했습니다: ${err.message}`;
+        solutions = [
+          '페이지를 새로고침한 후 다시 시도하세요',
+          '마이크 연결 상태를 확인하세요',
+          '브라우저를 재시작해보세요'
+        ];
       }
+
+      showErrorModal(title, message, solutions);
+
       startButton.disabled = false;
       stopButton.disabled = true;
       doRecording = false;

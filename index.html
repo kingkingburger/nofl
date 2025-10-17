@@ -116,6 +116,26 @@
   </div>
 </div>
 
+<!-- Error Modal -->
+<div id="errorModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <div class="modal-icon">⚠️</div>
+    <h2 id="errorTitle">마이크 접근 실패</h2>
+    <p id="errorMessage">마이크를 찾을 수 없습니다.</p>
+    <div id="errorSolutions" class="error-solutions">
+      <h3>해결 방법:</h3>
+      <ul>
+        <li>마이크가 연결되어 있는지 확인하세요</li>
+        <li>다른 앱에서 마이크를 사용 중인지 확인하세요</li>
+        <li>Windows 설정 > 개인정보 > 마이크에서 앱 권한을 확인하세요</li>
+        <li>브라우저 마이크 권한을 허용해주세요</li>
+      </ul>
+    </div>
+    <button class="modal-btn" id="errorModalBtn">확인</button>
+  </div>
+</div>
+
 <textarea id="output" rows="20" readonly style="display:none;"></textarea>
 
 <script type="text/javascript" src="/scripts/helpers.js"></script>
