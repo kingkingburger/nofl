@@ -70,11 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalClose = document.querySelector('.modal-close');
 
   const modelButtons = {
-    'tiny.en': document.getElementById('fetch-whisper-tiny-en'),
-    'base.en': document.getElementById('fetch-whisper-base-en'),
     'base': document.getElementById('fetch-whisper-base'),
-    'tiny-en-q5_1': document.getElementById('fetch-whisper-tiny-en-q5_1'),
-    'base-en-q5_1': document.getElementById('fetch-whisper-base-en-q5_1'),
   };
 
   // --- Modal Functions ---
