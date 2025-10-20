@@ -103,14 +103,64 @@ class TimerManager {
     this.timers = new Map();
     this.lastTranscript = '';
 
-    // 음성 명령 매핑
-    this.voiceCommands = [
-      { keywords: ['탑 노플', '탑노플', 'top nofl', 'top 노플', '탑 높을'], lane: 'TOP' },
-      { keywords: ['정글 노플', '정글노플', 'jgl nofl', 'jungle nofl', '정글 노플', '정글 높을'], lane: 'JGL' },
-      { keywords: ['미드 노플', '미드노플', 'mid nofl', '미드 노플', '미드 높을'], lane: 'MID' },
-      { keywords: ['원딜 노플', '원딜노플', 'bot nofl', '봇 노플', '원딜 노플', '바텀 노플', '바텀 높을'], lane: 'BOT' },
-      { keywords: ['서폿 노플', '서폿노플', 'sup nofl', 'support nofl', '서포트 노플', '서폿 높을'], lane: 'SUP' },
-    ];
+    // 기본 음성 명령 매핑
+    this.defaultKeywords = {
+      'TOP': ['탑 노플', '탑노플', 'top nofl', 'top 노플', '탑 높을'],
+      'JGL': ['정글 노플', '정글노플', 'jgl nofl', 'jungle nofl', '정글 노플', '정글 높을'],
+      'MID': ['미드 노플', '미드노플', 'mid nofl', '미드 노플', '미드 높을'],
+      'BOT': ['원딜 노플', '원딜노플', 'bot nofl', '봇 노플', '원딜 노플', '바텀 노플', '바텀 높을'],
+      'SUP': ['서폿 노플', '서폿노플', 'sup nofl', 'support nofl', '서포트 노플', '서폿 높을']
+    };
+
+    // 사용자 정의 키워드 로드
+    this.loadCustomKeywords();
+  }
+
+  /**
+   * localStorage에서 사용자 정의 키워드 로드
+   */
+  loadCustomKeywords() {
+    const saved = localStorage.getItem('nofl_custom_keywords');
+    this.customKeywords = saved ? JSON.parse(saved) : {};
+  }
+
+  /**
+   * 사용자 정의 키워드 저장
+   */
+  saveCustomKeywords() {
+    localStorage.setItem('nofl_custom_keywords', JSON.stringify(this.customKeywords));
+  }
+
+  /**
+   * 특정 라인의 키워드 설정
+   */
+  setLaneKeyword(lane, keyword) {
+    if (!keyword || keyword.trim() === '') {
+      delete this.customKeywords[lane];
+    } else {
+      this.customKeywords[lane] = keyword.trim().toLowerCase();
+    }
+    this.saveCustomKeywords();
+    console.log(`${lane} 키워드 설정:`, this.customKeywords[lane] || '기본값');
+  }
+
+  /**
+   * 특정 라인의 모든 키워드 가져오기 (사용자 정의 + 기본)
+   */
+  getLaneKeywords(lane) {
+    const keywords = [];
+
+    // 사용자 정의 키워드가 있으면 추가
+    if (this.customKeywords[lane]) {
+      keywords.push(this.customKeywords[lane]);
+    }
+
+    // 기본 키워드도 추가 (항상 사용 가능하도록)
+    if (this.defaultKeywords[lane]) {
+      keywords.push(...this.defaultKeywords[lane].map(k => k.toLowerCase()));
+    }
+
+    return keywords;
   }
 
   /**
@@ -125,12 +175,49 @@ class TimerManager {
       this.timers.set(lane, timer);
 
       // 클릭 이벤트 추가
-      element.addEventListener('click', () => {
+      element.addEventListener('click', (e) => {
+        // 입력 필드를 클릭한 경우는 타이머 시작하지 않음
+        if (e.target.classList.contains('lane-keyword-input')) {
+          return;
+        }
         timer.start();
       });
     });
 
+    // 키워드 입력 필드 초기화
+    this.initializeKeywordInputs();
+
     console.log('타이머 매니저 초기화 완료');
+  }
+
+  /**
+   * 키워드 입력 필드 초기화
+   */
+  initializeKeywordInputs() {
+    const inputs = document.querySelectorAll('.lane-keyword-input');
+
+    inputs.forEach(input => {
+      const lane = input.getAttribute('data-lane');
+
+      // 저장된 키워드가 있으면 입력 필드에 표시
+      if (this.customKeywords[lane]) {
+        input.value = this.customKeywords[lane];
+      }
+
+      // 입력 이벤트 리스너 추가 (실시간 저장)
+      input.addEventListener('input', (e) => {
+        this.setLaneKeyword(lane, e.target.value);
+      });
+
+      // Enter 키를 눌렀을 때 포커스 해제
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.target.blur();
+        }
+      });
+    });
+
+    console.log('키워드 입력 필드 초기화 완료');
   }
 
   /**
@@ -177,16 +264,21 @@ class TimerManager {
     const lowerText = text.toLowerCase().trim();
     console.log('음성 명령 처리:', lowerText);
 
-    for (const { keywords, lane } of this.voiceCommands) {
+    // 모든 라인에 대해 키워드 매칭 시도
+    const lanes = ['TOP', 'JGL', 'MID', 'BOT', 'SUP'];
+
+    for (const lane of lanes) {
+      const keywords = this.getLaneKeywords(lane);
+
       for (const keyword of keywords) {
-        if (lowerText.includes(keyword)) {
-          console.log(`음성 명령 매칭: ${lane}`);
+        if (lowerText.includes(keyword.toLowerCase())) {
+          console.log(`음성 명령 매칭: ${lane} (키워드: ${keyword})`);
 
           const timer = this.timers.get(lane);
           if (timer) {
             timer.start();
           }
-          return;
+          return; // 첫 번째 매칭만 처리
         }
       }
     }
