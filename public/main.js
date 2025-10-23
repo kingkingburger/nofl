@@ -120,14 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadWhisper(model) {
     const urls = {
-      'tiny.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin',
       'base.en': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin',
       'base': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin',
-      'tiny-en-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin',
-      'base-en-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin',
     };
     const sizes = {
-      'tiny.en': 75, 'base.en': 142, 'base': 142, 'tiny-en-q5_1': 31, 'base-en-q5_1': 57
+      'base.en': 142, 'base': 142
     };
 
     model_whisper = model;
@@ -262,7 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
           '마이크가 연결되어 있는지 확인하세요',
           '다른 앱에서 마이크를 사용 중인지 확인하세요',
           'Windows 설정 > 개인정보 > 마이크에서 앱 권한을 확인하세요',
-          '브라우저를 재시작해보세요'
+          '브라우저를 재시작해보세요',
+          '크롬 브라우저를 사용해보세요'
         ];
       } else if (err.name === 'NotAllowedError') {
         message = '마이크 권한이 거부되었습니다.';
